@@ -1,0 +1,45 @@
+#+TITLE: skel
+#+DESCRIPTION: project skeletons
+
+This system provides functions and macros for building and deploying
+project skeletons. /This is not a general purpose templating
+system/. It is specifically for software projects which are likely
+under version control, may be shared some day, and are made by me. It
+looks at projects from the top down. It doesn't care about the fiddly
+bits too much.
+
+#+name: artist-depiction
+#+begin_src artist
+              .7
+            .'/
+           / /
+          / /
+         / /
+        / /
+       / /
+      / /
+     / /         
+    / /          
+  __|/
+,-\__\
+|f-"Y\|
+\()7L/
+ cgD                            __ _
+ |\(                          .'  Y '>,
+  \ \                        / _   _   \
+   \\\                       )(_) (_)(|}
+    \\\                      {  4A   } /
+     \\\                      \uLuJJ/\l
+      \\\                     |3    p)/
+       \\\___ __________      /nnm_n//
+       c7___-__,__-)\,__)(".  \_>-<_/D
+                  //V     \_"-._.__G G_c__.-__<"/ ( \
+                         <"-._>__-,G_.___)\   \7\
+                        ("-.__.| \"<.__.-" )   \ \
+                        |"-.__"\  |"-.__.-".\   \ \
+                        ("-.__"". \"-.__.-".|    \_\
+                        \"-.__""|!|"-.__.-".)     \ \
+                         "-.__""\_|"-.__.-"./      \ l
+                          ".__""">G>-.__.-">       .--,_
+                              ""  G
+#+end_src
