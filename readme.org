@@ -1,12 +1,24 @@
 #+TITLE: skel
 #+DESCRIPTION: project skeletons
+* Overview 
++ status :: WIP
++ forge :: [[https://lab.rwest.io/ellis/skel][Heptapod]]
++ mirror :: [[https://github.com/richardwesthaver/skel][Github]]
 
 This system provides functions and macros for building and deploying
 project skeletons. /This is not a general purpose templating
 system/. It is specifically for software projects which are likely
-under version control, may be shared some day, and are made by me. It
-looks at projects from the top down. It doesn't care about the fiddly
-bits too much.
+under version control, may be shared some day, and are made by yours
+truly.
+
+Skel is intend to be run like so:
+
+#+begin_src sh
+skel base
+#+end_src
+
+you can replace =base= with any valid name for a =skeleton= object
+instance.
 
 #+name: artist-depiction
 #+begin_src artist
@@ -43,3 +55,15 @@ bits too much.
                           ".__""">G>-.__.-">       .--,_
                               ""  G
 #+end_src
+
+- Goals ::
+  - vaporize boilerplate code and docs
+  - integrate reasonably well with my tools (Emacs/etc)
+  - tree description of projects (nested sexps)
+- Non-Goals ::
+  - dependency management
+  - speed
+** resources
+- [[https://www.gnu.org/software/emacs/manual/html_node/autotype/Skeleton-Language.html][skeleton-lanaguage (emacs)]]
+- [[https://github.com/emacs-mirror/emacs/tree/master/lisp/cedet/ede][cedet/ede (emacs)]]
+- [[https://www.gnu.org/software/make/manual/make.html][GNU make]]
