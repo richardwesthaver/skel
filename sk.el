@@ -56,12 +56,27 @@ to trigger `skel-actions' based on the `skel-behavior' value."
   :type 'string
   :group 'skel)
 
+(define-minor-mode skel-mode
+  "skel minor-mode."
+  :global t
+  :lighter " sk"
+  :group 'skel
+  :version skel-version)
+
 (defvar skel-hashtable (make-hash-table :test #'equal)
   "Internal table of available skeletons.")
+
 (defvar skel-stack nil "Internal stack of skeletons.")
+
+(defcustom skel-state 'passive
+  "State toggle for the `skel' system. Base states are 'passive' and
+'active'."
+  :type 'symbol
+  :group 'skel)
 
 (defvar skel-active-map nil
   "List of cons cells of the form '(SYM . BODY...)' where SYM is a member of `skel-triggers'.")
+
 (defvar skel-passive-map nil
   "list of cons cells of the form '(SYM . BODY...)' where SYM is a member of `skel-triggers'.")
 
@@ -75,7 +90,7 @@ to trigger `skel-actions' based on the `skel-behavior' value."
   :documentation "Base class for skeleton objects. Inherits from `sxp'."
   :abstract t)
 
-(defmacro def-skel-class (name doc &optional slots superclasses)
+(defmacro def-sk-class (name doc &optional slots superclasses)
   "Define a new class with superclass of `skel'+SUPERCLASSES, SLOTS,
 DOC, and NAME. PFX is used as the first argument to `make-id' in
 the 'initform' key of the ':id' slot."
@@ -88,22 +103,15 @@ the 'initform' key of the ':id' slot."
 	`((:id :initarg :id :initform (make-id ,(symbol-name name)) :accessor id)))
      :documentation ,doc))
 
-(def-skel-class project "Project skeleton class.")
-(def-skel-class target "Target skeleton class.")
-(def-skel-class source "Source skeleton class.")
-(def-skel-class compiler "Compiler skeleton class.")
-(def-skel-class action "Action skeleton class.")
-(def-skel-class file "File skeleton class.")
-(def-skel-class script "Script skeleton class.")
-(def-skel-class doc "Doc skeleton class.")
-(def-skel-class config "Config skeleton class.")
-
-(define-minor-mode skel-mode
-  "skel minor-mode."
-  :global t
-  :lighter " sk"
-  :group 'skel
-  :version skel-version)
+(def-sk-class project "Project skeleton class.")
+(def-sk-class target "Target skeleton class.")
+(def-sk-class source "Source skeleton class.")
+(def-sk-class compiler "Compiler skeleton class.")
+(def-sk-class action "Action skeleton class.")
+(def-sk-class file "File skeleton class.")
+(def-sk-class script "Script skeleton class.")
+(def-sk-class doc "Doc skeleton class.")
+(def-sk-class config "Config skeleton class.")
 
 (provide 'skel)
 ;;; skel.el ends here
