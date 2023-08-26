@@ -74,19 +74,11 @@ instance.
       skpro [label="sk-project"]
       sksrc [label="sk-source"]
       sktar [label="sk-target"]
-      skcom [label="sk-compiler"]
-      skscr [label="sk-script"]
-      skdoc [label="sk-document"]
-      skcfg [label="sk-config"]
-      skfil [label="sk-file"]
+      skrul [label="sk-rule"]
       sk -> skpro
-      sk -> sksrc
-      sk -> sktar
-      sk -> skcom
-      sk -> skscr
-      sk -> skdoc
-      sk -> skcfg
-      sk -> skfil
+      skpro -> skrul
+      skrul -> sktar
+      skrul -> sksrc
     }
 #+end_src
 

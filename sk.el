@@ -107,15 +107,17 @@ DOC, and NAME."
 	`((:id :initarg :id :initform (make-id ,(symbol-name name)) :accessor id)))
      :documentation ,doc))
 
-(def-sk-class project "Project skeleton class.")
 (def-sk-class target "Target skeleton class.")
 (def-sk-class source "Source skeleton class.")
-(def-sk-class compiler "Compiler skeleton class.")
-(def-sk-class action "Action skeleton class.")
-(def-sk-class file "File skeleton class.")
-(def-sk-class script "Script skeleton class.")
-(def-sk-class document "Doc skeleton class.")
-(def-sk-class config "Config skeleton class.")
+(def-sk-class rule
+  "Config skeleton class."
+  ((target :initarg :target :initform nil :type (or null sk-target))
+   (rules :initarg :source :initform nil :type (or null sk-source))))
+
+(def-sk-class project
+  "Project skeleton class."
+  ((type :initarg :type :initform nil :accessor sk-project-type :type (or null symbol))
+   (rules :initarg :rules :initform nil :accessor sk-project-rules :type list)))
 
 (provide 'skel)
 ;;; skel.el ends here
