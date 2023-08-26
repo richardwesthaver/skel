@@ -26,7 +26,8 @@
 
 (eval-and-compile (require 'eieio)
 		  (require 'cl-lib)
-		  (require 'sxp (path-join user-dev-directory "sxp/sxp"))
+		  (require 'fu (expand-file-name "lisp/fu" user-emacs-directory))
+		  (require 'sxp (expand-file-name "sxp/sxp" user-dev-directory))
 		  (defvar skel-debug nil)
 		  (when skel-debug (require 'ede)))
 
@@ -35,7 +36,7 @@
 (defgroup skel nil
   "skel customization group.")
 
-(defcustom skel-keymap-prefix "C-c c x"
+(defcustom skel-keymap-prefix "C-c C-."
   "Prefix for `skel-mode' keymap."
   :type 'string
   :group 'skel)
@@ -85,18 +86,21 @@ to trigger `skel-actions' based on the `skel-behavior' value."
 	 (current-time-list nil))
      (symb pre (prog1 gensym-counter (setq gensym-counter (1+ gensym-counter))) (format "%x" (car (current-time))))))
 
+(defmacro defcmd (name &rest body) `(defun ,name nil (interactive) ,@body))
+
 (defclass sk (sxp)
-  ((:id :initarg :id :initform (make-id)))
+  ((id :initarg :id :initform (make-id)))
   :documentation "Base class for skeleton objects. Inherits from `sxp'."
   :abstract t)
 
+(defcmd sk-classes (eieio-class-children 'sk))
+
 (defmacro def-sk-class (name doc &optional slots superclasses)
   "Define a new class with superclass of `skel'+SUPERCLASSES, SLOTS,
-DOC, and NAME. PFX is used as the first argument to `make-id' in
-the 'initform' key of the ':id' slot."
+DOC, and NAME."
   (declare (indent 1))
   `(defclass ,(symb "sk-" name)
-     ,(if superclasses `(skel ,@superclasses) '(skel))
+     ,(if superclasses `(sk ,@superclasses) '(sk))
      ,(if slots
 	  `(,@slots
 	    (:id :initarg :id :initform (make-id ,(symbol-name name)) :accessor id))
@@ -110,7 +114,7 @@ the 'initform' key of the ':id' slot."
 (def-sk-class action "Action skeleton class.")
 (def-sk-class file "File skeleton class.")
 (def-sk-class script "Script skeleton class.")
-(def-sk-class doc "Doc skeleton class.")
+(def-sk-class document "Doc skeleton class.")
 (def-sk-class config "Config skeleton class.")
 
 (provide 'skel)
