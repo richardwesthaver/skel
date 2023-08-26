@@ -45,15 +45,13 @@ instance.
       \\\                     |3    p)/
        \\\___ __________      /nnm_n//
        c7___-__,__-)\,__)(".  \_>-<_/D
-                  //V     \_"-._.__G G_c__.-__<"/ ( \
-                         <"-._>__-,G_.___)\   \7\
-                        ("-.__.| \"<.__.-" )   \ \
-                        |"-.__"\  |"-.__.-".\   \ \
-                        ("-.__"". \"-.__.-".|    \_\
-                        \"-.__""|!|"-.__.-".)     \ \
-                         "-.__""\_|"-.__.-"./      \ l
-                          ".__""">G>-.__.-">       .--,_
-                              ""  G
+                  //V     \_"-._.__G G_c__.
+                         <"-._>__-,G_.___)\  
+                        ("-.__.| \"<.__.-" ) 
+                        |"-.__"\  |"-.__.-".\
+                        ("-.__"". \"-.__.-".|
+                        \"-.__""|!|"-.__.-".)
+                         "-.__""\_|"-.__.-"./
 #+end_src
 
 - Goals ::
@@ -70,8 +68,7 @@ instance.
 * API
 - CLOS-based core classes
 - EIEIO-based wrapper classes
-  #+name api-dot
-  #+begin_src dot :file api.svg :results output :exports none
+#+begin_src dot :file api.svg :exports results
     digraph { rankdir=LR; splines=true; node [shape=box]
       sk [label="skel"]
       skpro [label="sk-project"]
@@ -91,7 +88,7 @@ instance.
       sk -> skcfg
       sk -> skfil
     }
-  #+end_src
+#+end_src
 
-  #+RESULTS:
-  [[file:api.svg]]
+#+RESULTS:
+[[file:api.svg]]
