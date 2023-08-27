@@ -1,3 +1,5 @@
 (defpackage skel.cli
-  (:use :cl :skel))
+  (:use :cl :skel :macs.cli)
+  (:export :main))
 (in-package :skel.cli)
+(defun main () (with-cli (print (+ 2 2))))

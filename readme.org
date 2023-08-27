@@ -65,21 +65,36 @@ instance.
 - [[https://www.gnu.org/software/emacs/manual/html_node/autotype/Skeleton-Language.html][skeleton-lanaguage (emacs)]]
 - [[https://github.com/emacs-mirror/emacs/tree/master/lisp/cedet/ede][cedet/ede (emacs)]]
 - [[https://www.gnu.org/software/make/manual/make.html][GNU make]]
+* Quickstart
+#+begin_src shell :results silent
+sbcl --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
+#+end_src
 * API
 - CLOS-based core classes
 - EIEIO-based wrapper classes
 #+begin_src dot :file api.svg :exports results
-    digraph { rankdir=LR; splines=true; node [shape=box]
-      sk [label="skel"]
-      skpro [label="sk-project"]
-      sksrc [label="sk-source"]
-      sktar [label="sk-target"]
-      skrul [label="sk-rule"]
-      sk -> skpro
-      skpro -> skrul
-      skrul -> sktar
-      skrul -> sksrc
-    }
+  digraph { splines=true; label="CLOS API"; labelloc="t"; node [shape=record];
+    sk [label="(skel :ID :AST)"]
+    methods [label="(sk-compile sk-expand sk-build\nsk-run sk-init sk-new sk-save\nsk-tangle sk-weave sk-call sk-print)"]
+    skpro [label="(sk-project :RULES :)"]
+    sksrc [label="(sk-source)"]
+    sktar [label="(sk-target)"]
+    skcmd [label="(sk-command)"]
+    skrec [label="(sk-recipe :COMMANDS)"]
+    skrul [label="(sk-rule :TARGET :SOURCE :RECIPE)"]
+    skdoc [label="(sk-document)"]
+    sksni [label="(sk-snippet)"]
+    skcfg [label="(sk-config)"]
+    sk -> skpro
+    sk -> skdoc
+    sk -> sksni
+    sk -> skcfg
+    skpro -> skrul
+    skrul -> sktar
+    skrul -> sksrc
+    skrul -> skrec
+    skrec -> skcmd
+  }
 #+end_src
 
 #+RESULTS:
