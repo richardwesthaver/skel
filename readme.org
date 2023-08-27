@@ -11,60 +11,15 @@ system/. It is specifically for software projects which are likely
 under version control, may be shared some day, and are made by yours
 truly.
 
-Skel is intend to be run like so:
-
-#+begin_src sh
-skel base
-#+end_src
-
-you can replace =base= with any valid name for a =skeleton= object
-instance.
-
-#+name: artist-depiction
-#+begin_src artist
-              .7
-            .'/
-           / /
-          / /
-         / /
-        / /
-       / /
-      / /
-     / /         
-    / /          
-  __|/
-,-\__\
-|f-"Y\|
-\()7L/
- cgD                            __ _
- |\(                          .'  Y '>,
-  \ \                        / _   _   \
-   \\\                       )(_) (_)(|}
-    \\\                      {  4A   } /
-     \\\                      \uLuJJ/\l
-      \\\                     |3    p)/
-       \\\___ __________      /nnm_n//
-       c7___-__,__-)\,__)(".  \_>-<_/D
-                  //V     \_"-._.__G G_c__.
-                         <"-._>__-,G_.___)\  
-                        ("-.__.| \"<.__.-" ) 
-                        |"-.__"\  |"-.__.-".\
-                        ("-.__"". \"-.__.-".|
-                        \"-.__""|!|"-.__.-".)
-                         "-.__""\_|"-.__.-"./
-#+end_src
-
-- Goals ::
-  - vaporize boilerplate code and docs
-  - integrate reasonably well with my tools (Emacs/etc)
-  - tree description of projects (nested sexps)
-- Non-Goals ::
-  - dependency management
-  - speed
-** resources
+** Goals
+- vaporize boilerplate code and docs
+- integrate reasonably well with my tools (Emacs/etc)
+- tree description of projects (nested sexps)
+** Resources
 - [[https://www.gnu.org/software/emacs/manual/html_node/autotype/Skeleton-Language.html][skeleton-lanaguage (emacs)]]
 - [[https://github.com/emacs-mirror/emacs/tree/master/lisp/cedet/ede][cedet/ede (emacs)]]
 - [[https://www.gnu.org/software/make/manual/make.html][GNU make]]
+- [[https://docs.factorcode.org/content/article-vocabularies.html][Factor (forth) definitions]]
 * Quickstart
 #+begin_src shell :results silent
 sbcl --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
