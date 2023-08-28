@@ -1,5 +1,5 @@
 (defpackage skel.cli
-  (:use :cl :skel :macs.cli)
+  (:use :cl :skel :macs.cli :sb-unicode)
   (:export :main))
 
 (in-package :skel.cli)

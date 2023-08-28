@@ -31,24 +31,38 @@ sbcl --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cl
   digraph { splines=true; label="CLOS API"; labelloc="t"; node [shape=record];
     sk [label="(skel :ID :AST)"]
     methods [label="(sk-compile sk-expand sk-build\nsk-run sk-init sk-new sk-save\nsk-tangle sk-weave sk-call sk-print)"]
-    skpro [label="(sk-project :RULES :)"]
-    sksrc [label="(sk-source)"]
-    sktar [label="(sk-target)"]
+    skmet [label="(sk-meta :NAME :PATH :VERSION :DESCRIPTION)"]
     skcmd [label="(sk-command)"]
+    sktar [label="(sk-target)"]
+    sksrc [label="(sk-source)"]
     skrec [label="(sk-recipe :COMMANDS)"]
     skrul [label="(sk-rule :TARGET :SOURCE :RECIPE)"]
     skdoc [label="(sk-document)"]
-    sksni [label="(sk-snippet)"]
+    skscr [label="(sk-script)"]
     skcfg [label="(sk-config)"]
-    sk -> skpro
-    sk -> skdoc
-    sk -> sksni
+    sksni [label="(sk-snippet)"]    
+    skabb [label="(sk-abbrev)"]
+    skpro [label="(sk-project\l:RULES\l:DOCUMENTS\l:SCRIPTS\l:SNIPPETS\l:ABBREVS)\l"]
+    sk -> skmet
     sk -> skcfg
-    skpro -> skrul
-    skrul -> sktar
-    skrul -> sksrc
-    skrul -> skrec
-    skrec -> skcmd
+    sk -> sksni
+    sk -> skabb
+    sk -> sktar
+    sk -> skrul
+    sk -> sksrc
+    sk -> skcmd
+    skmet -> skpro
+    skmet -> skdoc    
+    skmet -> skscr    
+    skrul -> skpro
+    skscr -> skpro
+    skdoc -> skpro
+    sksni -> skpro
+    skabb -> skpro
+    sktar -> skrul
+    sksrc -> skrul
+    skrec -> skrul
+    skcmd -> skrec
   }
 #+end_src
 
