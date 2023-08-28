@@ -3,9 +3,7 @@
   (:export :main))
 
 (in-package :skel.cli)
+  
+(defmain (print-api))
 
-(defmain
-  (print (+ 2 2))
-  (terpri)
-  ;; test C-c
-  (sleep 4))
+

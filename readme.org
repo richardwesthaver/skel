@@ -21,9 +21,67 @@ truly.
 - [[https://www.gnu.org/software/make/manual/make.html][GNU make]]
 - [[https://docs.factorcode.org/content/article-vocabularies.html][Factor (forth) definitions]]
 * Quickstart
-#+begin_src shell :results silent
-sbcl --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
+Make sure you have sbcl installed:
+#+begin_src shell :results pp
+sbcl --version
 #+end_src
+
+#+RESULTS:
+: SBCL 2.3.7
+
+Then compile the program. This command produces a binary called =skel=
+in the project root:
+#+begin_src shell :results pp
+sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
+#+end_src
+
+#+RESULTS:
+#+begin_example
+To load "skel":
+  Load 1 ASDF system:
+    skel
+; Loading "skel"
+...
+compressed 32768 bytes into 634 at level 9
+compressed 25460736 bytes into 4654694 at level 9
+compressed 8060928 bytes into 2550706 at level 9
+compressed 2162688 bytes into 536454 at level 9
+compressed 12976128 bytes into 3308675 at level 9
+#+end_example
+
+Run the binary without any args, which will print a skeleton of the
+current project directory (=*sk-project*=).
+
+#+begin_src shell :results pp
+./skel
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#<SKEL ID=NIL>
+
+#<SK-PROJECT TYPE=NIL, RULES=NIL, DOCUMENTS=NIL, SCRIPTS=NIL, SNIPPETS=NIL, ABBREVS=NIL, ID=NIL>
+
+#<SK-SOURCE ID=NIL>
+
+#<SK-TARGET ID=NIL>
+
+#<SK-RECIPE COMMANDS=NIL, ID=NIL>
+
+#<SK-RULE TARGET=NIL, SOURCE=NIL, RECIPE=NIL, ID=NIL>
+
+#<SK-DOCUMENT ID=NIL>
+
+#<SK-SCRIPT ID=NIL>
+
+#<SK-CONFIG ID=NIL>
+
+#<SK-SNIPPET ID=NIL>
+
+#<SK-ABBREV ID=NIL>
+
+#+end_example
+
 * API
 - CLOS-based core classes
 - EIEIO-based wrapper classes
