@@ -1,20 +1,25 @@
+;;; skel.lisp --- skeletons library
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
-
 (defpackage skel
   (:use :cl :sxp :macs.fu :sb-mop)
-  (:import-from :sb-posix :getcwd)
-  (:export :skel :def-sk-class
-	   :*sk-project* :*sk-project-registry* :*sk-cache*
-	   :sk-project :sk-target :sk-source :sk-recipe :sk-rule
-	   :sk-project-type :sk-project-rules :sk-id
-	   :sk-document :sk-script :sk-config :sk-snippet :sk-abbrev
-	   :describe-skeleton :describe-project :print-api))
+  (:import-from :sb-posix :getcwd :getuid)
+  (:import-from :sb-unix :uid-username)
+  (:export
+   :*skel-project* :*skel-project-registry* :*default-skel-file* :*default-skel-user* 
+   :*default-skel-cache* :*global-skel-file* :*skel-file-extension*
+   :skel :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule
+   :sk-project-type :sk-project-rules :sk-id :sk-document :sk-script :sk-config :sk-snippet :sk-abbrev
+   :describe-skeleton :describe-project :print-api))
 
 (in-package :skel)
 
-(defparameter *sk-project* nil)
-(defparameter *sk-project-registry* nil)
-(defparameter *sk-cache* nil)
+(defparameter *skel-project* nil)
+(defparameter *skel-project-registry* nil)
+(defparameter *default-skel-file* ".skel")
+(defparameter *default-skel-user* (uid-username (getuid)))
+(defparameter *default-skel-cache* (make-pathname :directory (format nil "home/~a/.cache/skel" *default-skel-user*)))
+(defparameter *global-skel-file* (make-pathname :name "/etc/skel"))
+(defparameter *skel-file-extension* "sk")
 
 (defclass skel (sxp)
   ((id :initarg :id :initform nil :accessor sk-id))
@@ -28,7 +33,6 @@
 		(if (slot-boundp self s)
 		    (setf r (nconc r (list s (slot-value self s))))))
 	      r))))
-
 
 (defmacro def-sk-class (name doc &optional superclasses slots)
   "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."

@@ -41,12 +41,17 @@ To load "skel":
   Load 1 ASDF system:
     skel
 ; Loading "skel"
-...
+..................................................
+[package skel]
+; compiling file "/home/ellis/dev/skel/cli.lisp" (written 28 AUG 2023 05:49:17 PM):
+
+; wrote /home/ellis/.cache/common-lisp/sbcl-2.3.7-linux-x64/home/ellis/dev/skel/cli-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.000
 compressed 32768 bytes into 634 at level 9
-compressed 25460736 bytes into 4654694 at level 9
-compressed 8060928 bytes into 2550706 at level 9
-compressed 2162688 bytes into 536454 at level 9
-compressed 12976128 bytes into 3308675 at level 9
+compressed 25460736 bytes into 4655828 at level 9
+compressed 8060928 bytes into 2550844 at level 9
+compressed 2162688 bytes into 536925 at level 9
+compressed 12976128 bytes into 3307482 at level 9
 #+end_example
 
 Run the binary without any args, which will print a skeleton of the
