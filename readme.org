@@ -22,7 +22,7 @@ truly.
 - [[https://docs.factorcode.org/content/article-vocabularies.html][Factor (forth) definitions]]
 * Quickstart
 Make sure you have sbcl installed:
-#+begin_src shell :results pp
+#+begin_src shell :results pp :exports both
 sbcl --version
 #+end_src
 
@@ -31,7 +31,7 @@ sbcl --version
 
 Then compile the program. This command produces a binary called =skel=
 in the project root:
-#+begin_src shell :results pp
+#+begin_src shell :results pp :exports both
 sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
 #+end_src
 
@@ -52,7 +52,7 @@ compressed 12976128 bytes into 3308675 at level 9
 Run the binary without any args, which will print a skeleton of the
 current project directory (=*sk-project*=).
 
-#+begin_src shell :results pp
+#+begin_src shell :results pp :exports both
 ./skel
 #+end_src
 
