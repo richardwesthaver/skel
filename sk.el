@@ -20,7 +20,12 @@
 
 ;;; Commentary:
 
-;; 
+;; TODO
+
+;; - auto-insert
+;; - skeleton
+;; - tempo
+;; - d/abbrevs
 
 ;;; Code:
 

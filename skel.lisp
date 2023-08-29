@@ -7,8 +7,8 @@
   (:export
    :*skel-project* :*skel-project-registry* :*default-skel-file* :*default-skel-user* 
    :*default-skel-cache* :*global-skel-file* :*skel-file-extension*
-   :skel :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule
-   :sk-project-type :sk-project-rules :sk-id :sk-document :sk-script :sk-config :sk-snippet :sk-abbrev
+   :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
+   :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :print-api))
 
 (in-package :skel)
@@ -45,11 +45,15 @@
 	  `((id :initarg :id :initform nil)))
      (:documentation ,doc)))
 
-(def-sk-class meta "Meta skeleton class." ()
-  ((name :initarg :name :initform nil :type (or null string))
-   (path :initarg :path :initform nil :type (or null pathname))
-   (version :initarg :version :initform nil :type (or list string))
-   (description :initarg :description :initform nil :type (or null string))))
+(defclass sk-meta ()
+  ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
+   (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
+   (version :initarg :version :initform nil :type (or list string) :accessor sk-version)
+   (type :initarg :type :initform nil :accessor sk-type)
+   (description :initarg :description :initform nil :type (or null string) :accessor sk-description))
+  (:documentation "Meta skeleton class."))
+   
+
 (def-sk-class command "Command skeleton class.")
 (def-sk-class target "Target skeleton class.")
 (def-sk-class source "Source skeleton class.")
@@ -69,13 +73,12 @@ via the special form stored in the `ast' slot."
 (def-sk-class snippet "Document skeleton class.")
 (def-sk-class abbrev "Document skeleton class.")
 (def-sk-class project "Project skeleton class."
-  ()
-  ((type :initarg :type :initform nil :accessor sk-project-type)
-   (rules :initarg :rules :initform nil :accessor sk-project-rules :type (or list (vector sk-rule)))
-   (documents :initarg :documents :initform nil :accessor sk-project-documents :type (or list (vector sk-document)))
-   (scripts :initarg :scripts :initform nil :accessor sk-project-scripts :type (or list (vector sk-script)))
-   (snippets :initarg :snippets :initform nil :accessor sk-project-snippets :type (or list (vector sk-snippet)))
-   (abbrevs :initarg :abbrevs :initform nil :accessor sk-project-abbrevs :type (or list (vector sk-abbrevs)))))
+  (sk-meta)
+  ((rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
+   (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
+   (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
+   (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
+   (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
 ;;; util
 (defun describe-skeleton (skel &optional (stream t))
