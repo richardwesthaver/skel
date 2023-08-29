@@ -5,8 +5,8 @@
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:export
-   :*skel-project* :*skel-project-registry* :*default-skel-file* :*default-skel-user* 
-   :*default-skel-cache* :*global-skel-file* :*skel-file-extension*
+   :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
+   :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skel-file-extension*
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :print-api))
@@ -15,10 +15,11 @@
 
 (defparameter *skel-project* nil)
 (defparameter *skel-project-registry* nil)
-(defparameter *default-skel-file* ".skel")
+(defparameter *default-skelfile* "skelfile")
 (defparameter *default-skel-user* (uid-username (getuid)))
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "home/~a/.cache/skel" *default-skel-user*)))
-(defparameter *global-skel-file* (make-pathname :name "/etc/skel"))
+(defparameter *default-user-skel-config* (make-pathname :name (format nil "home/~a/.skelrc" *default-skel-user*)))
+(defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
 (defparameter *skel-file-extension* "sk")
 
 (defclass skel (sxp)
