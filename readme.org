@@ -124,7 +124,7 @@ current project directory (=*skel-project*=).
     skabb -> skpro
     sktar -> skrul
     sksrc -> skrul
-    skrec -> skruly
+    skrec -> skrul
     skcmd -> skrec
   }
 #+end_src
