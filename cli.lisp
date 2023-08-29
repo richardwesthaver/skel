@@ -3,7 +3,7 @@
   (:export :main))
 
 (in-package :skel.cli)
-  
+
 (defmain (print-api))
 
 
