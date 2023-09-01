@@ -15,11 +15,11 @@
   :version "0.1.0"
   :build-operation "program-op"
   :build-pathname "skel"
-  :entry-point "skel.cli::main"
+  :entry-point "skel.cli:main"
   :perform (test-op (test-op skel/tests))
   :components ((:file "cli")))
 
 (defsystem "skel/tests"
-  :depends-on (:skel :sb-rt)
+  :depends-on (:skel :macs/rt)
   :perform (test-op (op c) (uiop:symbol-call '#:skel.tests '#:run-tests))
   :components ((:file "tests")))
