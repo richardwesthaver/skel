@@ -31,7 +31,7 @@ sbcl --version
 
 Then compile the program. This command produces a binary called =skel=
 in the project root:
-#+begin_src shell :results silent
+#+begin_src shell :results nil
 sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
 #+end_src
 
@@ -44,7 +44,6 @@ current project directory (=*skel-project*=).
 
 #+RESULTS:
 #+begin_example
-
 SKEL --- THE PROJECT COMPILER
 █████████████████████████████████████████████████████████
 ██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
@@ -76,10 +75,16 @@ top-level options:
 
 commands:
   (build)
-  (make)
+  (run)
+  (test)
+  (check)
+  (deploy)
   (init)
   (new)
+  (make)
   (compile)
+  (tangle)
+  (weave)
 #+end_example
 
 * API

@@ -3,8 +3,7 @@
   (:export :main))
 (in-package :skel.cli)
 
-(defvar *skel-banner* "
-SKEL --- THE PROJECT COMPILER")
+(defvar *skel-banner* "SKEL --- THE PROJECT COMPILER")
 (defvar *skel-art* "
 █████████████████████████████████████████████████████████
 ██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
@@ -37,11 +36,31 @@ top-level options:
 
 commands:
   (build)
-  (make)
+  (run)
+  (test)
+  (check)
+  (deploy)
   (init)
   (new)
+  (make)
   (compile)
+  (tangle)
+  (weave)
 ")
 
+(defvar *cli*
+  (make-cli t
+	    :name "skel"
+	    :version "0.1.1"
+	    :opts #((make-cli :opt :name "help")
+		    (make-cli :opt :name "version")
+		    (make-cli :opt :name "quiet")
+		    (make-cli :opt :name "log"))
+	    :cmds #((make-cli :cmd :name "show"))))
+
+(defun run ()
+  (with-cli (opts cmds help version) *cli*
+    (format t "~A~A~A" *skel-banner* *skel-art* *skel-help*)))
+
 ;; (print-api)
-(defmain () (format t "~A~A~A" *skel-banner* *skel-art* *skel-help*))
+(defmain () (run))
