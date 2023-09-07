@@ -7,6 +7,7 @@
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skel-file-extension*
+   :find-skel-file :load-skel-file
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :print-api))
@@ -34,6 +35,14 @@
 	    (id :initarg :id :initform nil))
 	  `((id :initarg :id :initform nil)))
      (:documentation ,doc)))
+
+(defun find-skel-file (&optional root)
+  "Walk up the current directory returning the path to a 'skelfile', else return nil."
+  (print root))
+
+(defun load-skel-file (&optional file)
+  "Load the 'skelfile' found at FILE or by calling `find-skel-file'."
+  (print file))
 
 ;;; PROTO
 

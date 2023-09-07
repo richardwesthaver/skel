@@ -31,20 +31,21 @@ sbcl --version
 
 Then compile the program. This command produces a binary called =skel=
 in the project root:
-#+begin_src shell :results nil
+#+begin_src shell :results raw silent
 sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
 #+end_src
 
 Run the binary without any args, which will print a skeleton of the
 current project directory (=*skel-project*=).
 
-#+begin_src shell :results pp :exports both
-./skel
+#+begin_src shell :results drawer replace :exports both
+./skel -v && ./skel banner && ./skel -h
 #+end_src
 
 #+RESULTS:
-#+begin_example
-SKEL --- THE PROJECT COMPILER
+:results:
+
+"0.1.1" 
 █████████████████████████████████████████████████████████
 ██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
 ███████████████████▀░░░░░░░░░░░░░░░░░▀███████████████████
@@ -63,7 +64,8 @@ SKEL --- THE PROJECT COMPILER
 ████████████████████▄░░░└┴┴┴┴┴┴┴┘░░░▄████████████████████
 ██████████████████████▄░░░░░░░░░░░▄██████████████████████
 █████████████████████████▄▄▄▄▄▄▄█████████████████████████
-usage: skel [global] <command> [<args>] -- <sxp>
+
+"usage: skel [global] <command> [<args>] -- <sxp>
 
 global options:
   -q|--quiet    silence all output
@@ -85,7 +87,8 @@ commands:
   (compile)
   (tangle)
   (weave)
-#+end_example
+" 
+:end:
 
 * API
 - CLOS-based core classes
