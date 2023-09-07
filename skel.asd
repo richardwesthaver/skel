@@ -8,7 +8,8 @@
   :bug-tracker "https://lab.rwest.io/ellis/skel/issues"
   :depends-on (:macs :sxp :organ)
   :in-order-to ((test-op (test-op skel/tests)))
-  :components ((:file "skel")))
+  :components ((:file "make")
+	       (:file "skel")))
 
 (defsystem "skel/cli"
   :depends-on (:skel :macs)

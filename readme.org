@@ -27,43 +27,13 @@ sbcl --version
 #+end_src
 
 #+RESULTS:
-: SBCL 2.3.7
+: SBCL 2.3.8.18.master.74-8cf7faf9a
 
 Then compile the program. This command produces a binary called =skel=
 in the project root:
-#+begin_src shell :results pp :exports both
+#+begin_src shell :results silent
 sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:make :skel/cli)'
 #+end_src
-
-#+RESULTS:
-#+begin_example
-To load "skel":
-  Load 1 ASDF system:
-    skel
-; Loading "skel"
-[package macs.reexport]...........................
-[package macs.str]................................
-[package macs.sym]................................
-[package macs.list]...............................
-[package macs.cond]...............................
-[package macs.readtables].........................
-[package macs.fu].................................
-[package macs.ana]................................
-[package macs.pan]................................
-[package macs.fs].................................
-[package macs.cli]................................
-[package macs.rt].................................
-[package skel].
-; compiling file "/home/ellis/dev/skel/cli.lisp" (written 30 AUG 2023 09:31:36 PM):
-
-; wrote /home/ellis/.cache/common-lisp/sbcl-2.3.7-linux-x64/home/ellis/dev/skel/cli-tmp5GEXGEG5.fasl
-; compilation finished in 0:00:00.000
-compressed 32768 bytes into 634 at level 9
-compressed 25460736 bytes into 4649845 at level 9
-compressed 8060928 bytes into 2551315 at level 9
-compressed 2162688 bytes into 537916 at level 9
-compressed 12976128 bytes into 3307460 at level 9
-#+end_example
 
 Run the binary without any args, which will print a skeleton of the
 current project directory (=*skel-project*=).
@@ -74,28 +44,42 @@ current project directory (=*skel-project*=).
 
 #+RESULTS:
 #+begin_example
-#<SKEL ID=NIL>
 
-#<SK-PROJECT RULES=NIL, DOCUMENTS=NIL, SCRIPTS=NIL, SNIPPETS=NIL, ABBREVS=NIL, ID=NIL>
+SKEL --- THE PROJECT COMPILER
+█████████████████████████████████████████████████████████
+██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
+███████████████████▀░░░░░░░░░░░░░░░░░▀███████████████████
+██████████████████│░░░░░░░░░░░░░░░░░░░│██████████████████
+█████████████████▌│░░░░░░░░░░░░░░░░░░░│▐█████████████████
+█████████████████░└┐░░░░░░░░░░░░░░░░░┌┘░█████████████████
+█████████████████░░└┐░░░░░░░░░░░░░░░┌┘░░█████████████████
+█████████████████░░┌┘▄▄▄▄▄░░░░░▄▄▄▄▄└┐░░█████████████████
+█████████████████▌░│██████▌░░░▐██████│░▐█████████████████
+██████████████████░│▐███▀▀░░▄░░▀▀███▌│░██████████████████
+█████████████████▀─┘░░░░░░░▐█▌░░░░░░░└─▀█████████████████
+█████████████████▄░░░▄▄▄▓░░▀█▀░░▓▄▄▄░░░▄█████████████████
+███████████████████▄─┘██▌░░░░░░░▐██└─▄███████████████████
+████████████████████░░▐█─┬┬┬┬┬┬┬─█▌░░████████████████████
+███████████████████▌░░░▀┬┼┼┼┼┼┼┼┬▀░░░▐███████████████████
+████████████████████▄░░░└┴┴┴┴┴┴┴┘░░░▄████████████████████
+██████████████████████▄░░░░░░░░░░░▄██████████████████████
+█████████████████████████▄▄▄▄▄▄▄█████████████████████████
+usage: skel [global] <command> [<args>] -- <sxp>
 
-#<SK-SOURCE ID=NIL>
+global options:
+  -q|--quiet    silence all output
+  -l|--log      set log level (debug,info,trace,warn)
 
-#<SK-TARGET ID=NIL>
+top-level options:
+  -h|--help     pring help
+  -v|--version  print version
 
-#<SK-RECIPE COMMANDS=NIL, ID=NIL>
-
-#<SK-RULE TARGET=NIL, SOURCE=NIL, RECIPE=NIL, ID=NIL>
-
-#<SK-DOCUMENT ID=NIL>
-
-#<SK-SCRIPT ID=NIL>
-
-#<SK-CONFIG ID=NIL>
-
-#<SK-SNIPPET ID=NIL>
-
-#<SK-ABBREV ID=NIL>
-
+commands:
+  (build)
+  (make)
+  (init)
+  (new)
+  (compile)
 #+end_example
 
 * API

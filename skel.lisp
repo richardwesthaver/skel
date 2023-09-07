@@ -1,7 +1,7 @@
 ;;; skel.lisp --- skeletons library
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 (defpackage skel
-  (:use :cl :sxp :macs.fu :sb-mop)
+  (:use :cl :sxp :macs.fu :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:export
@@ -13,6 +13,7 @@
 
 (in-package :skel)
 
+;;; VARS
 (defparameter *skel-project* nil)
 (defparameter *skel-project-registry* nil)
 (defparameter *default-skelfile* "skelfile")
@@ -22,6 +23,21 @@
 (defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
 (defparameter *skel-file-extension* "sk")
 
+;;; UTIL
+(defmacro def-sk-class (name doc &optional superclasses slots)
+  "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
+  `(defclass ,(symb 'sk- name)
+       ,(if superclasses `(skel ,@superclasses) '(skel))
+     ;; TODO 2023-08-26: 
+     ,(if slots
+	  `(,@slots
+	    (id :initarg :id :initform nil))
+	  `((id :initarg :id :initform nil)))
+     (:documentation ,doc)))
+
+;;; PROTO
+
+;;; OBJ
 (defclass skel (sxp)
   ((id :initarg :id :initform nil :accessor sk-id))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
@@ -35,17 +51,6 @@
 		    (setf r (nconc r (list s (slot-value self s))))))
 	      r))))
 
-(defmacro def-sk-class (name doc &optional superclasses slots)
-  "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
-  `(defclass ,(symb 'sk- name)
-       ,(if superclasses `(skel ,@superclasses) '(skel))
-     ;; TODO 2023-08-26: 
-     ,(if slots
-	  `(,@slots
-	    (id :initarg :id :initform nil))
-	  `((id :initarg :id :initform nil)))
-     (:documentation ,doc)))
-
 (defclass sk-meta ()
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
@@ -54,7 +59,6 @@
    (description :initarg :description :initform nil :type (or null string) :accessor sk-description))
   (:documentation "Meta skeleton class."))
    
-
 (def-sk-class command "Command skeleton class.")
 (def-sk-class target "Target skeleton class.")
 (def-sk-class source "Source skeleton class.")
@@ -81,7 +85,7 @@ via the special form stored in the `ast' slot."
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
-;;; util
+;;; DBG
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
   (format stream "~A~%" skel)

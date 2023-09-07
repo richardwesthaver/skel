@@ -62,12 +62,22 @@ to trigger `skel-actions' based on the `skel-behavior' value."
   :type 'string
   :group 'skel)
 
-(define-minor-mode skel-mode
-  "skel minor-mode."
+(define-minor-mode skel-minor-mode
+  "skel-minor-mode."
   :global t
   :lighter " sk"
   :group 'skel
   :version skel-version)
+
+;; TODO 2023-09-06: 
+(define-derived-mode skel-mode lisp-data-mode "SKEL"
+  "skel-mode")
+
+
+(defun maybe-skel-minor-mode ()
+  "Check the current environment and determine if `skel-minor-mode' should
+be enabled. This function is added as a hook to
+`lisp-data-mode-hook'.")
 
 (defvar skel-hashtable (make-hash-table :test #'equal)
   "Internal table of available skeletons.")
@@ -123,6 +133,12 @@ DOC, and NAME."
   "Project skeleton class."
   ((type :initarg :type :initform nil :accessor sk-project-type :type (or null symbol))
    (rules :initarg :rules :initform nil :accessor sk-project-rules :type list)))
+
+(defun skel-init ()
+  "Initialize the skel library."
+  (interactive)
+  (add-to-list 'auto-mode-alist '("skelfile" . skel-mode))
+  (add-to-list 'auto-mode-alist '("\\.sk\\'" . skel-mode)))
 
 (provide 'skel)
 ;;; skel.el ends here

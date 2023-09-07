@@ -6,6 +6,6 @@
 (defsuite skel.tests)
 (in-suite skel.tests)
 
-(deftest sanity
-  (= 1 1)
-  2)
+(deftest sanity (:persist t))
+
+
