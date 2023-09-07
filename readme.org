@@ -44,8 +44,8 @@ current project directory (=*skel-project*=).
 
 #+RESULTS:
 :results:
+0.1.1
 
-"0.1.1" 
 █████████████████████████████████████████████████████████
 ██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
 ███████████████████▀░░░░░░░░░░░░░░░░░▀███████████████████
@@ -64,8 +64,7 @@ current project directory (=*skel-project*=).
 ████████████████████▄░░░└┴┴┴┴┴┴┴┘░░░▄████████████████████
 ██████████████████████▄░░░░░░░░░░░▄██████████████████████
 █████████████████████████▄▄▄▄▄▄▄█████████████████████████
-
-"usage: skel [global] <command> [<args>] -- <sxp>
+usage: skel [global] <command> [<args>] -- <sxp>
 
 global options:
   -q|--quiet    silence all output
@@ -87,7 +86,6 @@ commands:
   (compile)
   (tangle)
   (weave)
-" 
 :end:
 
 * API
