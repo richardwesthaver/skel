@@ -38,12 +38,12 @@ sbcl --noinform  --non-interactive --eval '(ql:quickload :skel)' --eval '(asdf:m
 Run the binary without any args, which will print a skeleton of the
 current project directory (=*skel-project*=).
 
-#+begin_src shell :results drawer replace :exports both
+#+begin_src shell :results output replace :exports both
 ./skel -v && ./skel banner && ./skel -h
 #+end_src
 
 #+RESULTS:
-:results:
+#+begin_example
 0.1.1
 
 █████████████████████████████████████████████████████████
@@ -86,7 +86,7 @@ commands:
   (compile)
   (tangle)
   (weave)
-:end:
+#+end_example
 
 * API
 - CLOS-based core classes
