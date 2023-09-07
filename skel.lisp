@@ -7,10 +7,10 @@
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skel-file-extension*
-   :find-skel-file :load-skel-file
+   :*skel-file-boundary* :find-skel-file :load-skel-file
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
-   :describe-skeleton :describe-project :print-api))
+   :describe-skeleton :describe-project))
 
 (in-package :skel)
 
@@ -23,6 +23,8 @@
 (defparameter *default-user-skel-config* (make-pathname :name (format nil "home/~a/.skelrc" *default-skel-user*)))
 (defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
 (defparameter *skel-file-extension* "sk")
+(defvar *skel-file-boundary* nil "Set an upper bounds on how many times and how far to walk an arbitrary
+file directory.")
 
 ;;; UTIL
 (defmacro def-sk-class (name doc &optional superclasses slots)
@@ -36,13 +38,19 @@
 	  `((id :initarg :id :initform nil)))
      (:documentation ,doc)))
 
-(defun find-skel-file (&optional root)
-  "Walk up the current directory returning the path to a 'skelfile', else return nil."
-  (print root))
+(defun find-skel-file (&key (start (getcwd)) (load nil) (name *default-skelfile*))
+  "Walk up the current directory returning the path to a 'skelfile', else
+return nil. When LOAD is non-nil, load the skelfile if found."
+  ;; Check the current path, if no skelfile found, walk up a level and
+  ;; continue until the `*skel-file-boundary*' is triggered.
 
-(defun load-skel-file (&optional file)
-  "Load the 'skelfile' found at FILE or by calling `find-skel-file'."
-  (print file))
+  (print start)
+  (print load)
+  (print name))
+
+(defun load-skel-file (file)
+  "Load the 'skelfile' FILE."
+  (sxp:read-sxp-file file))
 
 ;;; PROTO
 
@@ -97,20 +105,12 @@ via the special form stored in the `ast' slot."
 ;;; DBG
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
-  (format stream "~A~%" skel)
+  (print-object skel stream)
   (terpri stream))
 
 (defun describe-project (&optional path (stream t))
   "Describe the project responsible for the pathname PATH. Defaults to
 `sb-posix:getcwd'."
-  (let ((project-path (or path (getcwd))))
-    (print project-path stream)
+  (let* ((cd (or path (getcwd))))
+    (print cd stream)
     (terpri stream)))
-
-(defun print-api (&optional root)
-  "Print a tree of CLOS classes and methods to *standard-output*."
-  (declare (ignorable root))
-  (mapc
-   (lambda (sk) (describe-skeleton (make-instance sk)))
-   '(skel sk-project sk-source sk-target sk-recipe sk-rule
-     sk-document sk-script sk-config sk-snippet sk-abbrev)))

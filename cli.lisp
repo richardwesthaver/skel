@@ -1,28 +1,13 @@
+;;; cli.lisp --- skel cli
+
+;;; Code:
 (defpackage skel.cli
-  (:use :cl :skel :macs.cli)
+  (:use :cl :cond :cli :skel)
+  (:shadowing-import-from :sb-ext :defglobal)
   (:export :main))
+
 (in-package :skel.cli)
 
-(defvar *skel-art* "
-█████████████████████████████████████████████████████████
-██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
-███████████████████▀░░░░░░░░░░░░░░░░░▀███████████████████
-██████████████████│░░░░░░░░░░░░░░░░░░░│██████████████████
-█████████████████▌│░░░░░░░░░░░░░░░░░░░│▐█████████████████
-█████████████████░└┐░░░░░░░░░░░░░░░░░┌┘░█████████████████
-█████████████████░░└┐░░░░░░░░░░░░░░░┌┘░░█████████████████
-█████████████████░░┌┘▄▄▄▄▄░░░░░▄▄▄▄▄└┐░░█████████████████
-█████████████████▌░│██████▌░░░▐██████│░▐█████████████████
-██████████████████░│▐███▀▀░░▄░░▀▀███▌│░██████████████████
-█████████████████▀─┘░░░░░░░▐█▌░░░░░░░└─▀█████████████████
-█████████████████▄░░░▄▄▄▓░░▀█▀░░▓▄▄▄░░░▄█████████████████
-███████████████████▄─┘██▌░░░░░░░▐██└─▄███████████████████
-████████████████████░░▐█─┬┬┬┬┬┬┬─█▌░░████████████████████
-███████████████████▌░░░▀┬┼┼┼┼┼┼┼┬▀░░░▐███████████████████
-████████████████████▄░░░└┴┴┴┴┴┴┴┘░░░▄████████████████████
-██████████████████████▄░░░░░░░░░░░▄██████████████████████
-█████████████████████████▄▄▄▄▄▄▄█████████████████████████
-")
 (defvar *skel-help* "usage: skel [global] <command> [<args>] -- <sxp>
 
 global options:
@@ -47,26 +32,22 @@ commands:
   (weave)
 ")
 
-(defvar *cli*
-  (make-cli t
-	    :name "skel"
-	    :version "0.1.1"
-	    :banner *skel-art*
-	    :help *skel-help*
-	    :opts #((make-cli :opt :name "help")
-		    (make-cli :opt :name "version")
-		    (make-cli :opt :name "quiet")
-		    (make-cli :opt :name "log"))
-	    :cmds #((make-cli :cmd :name "show"))))
+(defvar *opts* (make-opts help version log "file"))
+(defvar *cmds* (make-cmds status build run))
+(defparameter *cli*
+  (make-cli t :name "skel"
+	      :version "0.1.1"
+	      :help *skel-help*
+	      :opts (make-opts help version log "file")
+	      :cmds (make-cmds status build run)))
 
 (defun run ()
-  (with-cli (opts cmds) *cli* (cli-args)
+  (with-cli (opts cmds) *cli*
     (cond
-      ((member "show" *argv* :test #'string=) (describe-project))
+      ((member "status" *argv* :test #'string=) (nyi!))
       ((member "-h" *argv* :test #'string=) (print-help *cli*))
       ((member "-v" *argv* :test #'string=) (print-version *cli*))
-      (t (print-banner *cli*)))))
+      (t (describe-project)))))
        
-
-;; (print-api)
-(defmain () (run) (sb-ext:exit :code 0))
+(defmain ()
+  (run) (sb-ext:exit :code 0))
