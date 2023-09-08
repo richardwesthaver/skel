@@ -7,30 +7,8 @@
 
 This system provides functions and macros for building and deploying
 project skeletons. /This is not a general purpose templating
-system/. It is specifically for software projects which are likely
-under version control, may be shared some day, and are made by yours
-truly.
+system/. It is specifically for my software stack.
 
-#+begin_center
-█████████████████████████████████████████████████████████
-██████████████████████▀▀▀░░░░░░░▀▀▀██████████████████████
-███████████████████▀░░░░░░░░░░░░░░░░░▀███████████████████
-██████████████████│░░░░░░░░░░░░░░░░░░░│██████████████████
-█████████████████▌│░░░░░░░░░░░░░░░░░░░│▐█████████████████
-█████████████████░└┐░░░░░░░░░░░░░░░░░┌┘░█████████████████
-█████████████████░░└┐░░░░░░░░░░░░░░░┌┘░░█████████████████
-█████████████████░░┌┘▄▄▄▄▄░░░░░▄▄▄▄▄└┐░░█████████████████
-█████████████████▌░│██████▌░░░▐██████│░▐█████████████████
-██████████████████░│▐███▀▀░░▄░░▀▀███▌│░██████████████████
-█████████████████▀─┘░░░░░░░▐█▌░░░░░░░└─▀█████████████████
-█████████████████▄░░░▄▄▄▓░░▀█▀░░▓▄▄▄░░░▄█████████████████
-███████████████████▄─┘██▌░░░░░░░▐██└─▄███████████████████
-████████████████████░░▐█─┬┬┬┬┬┬┬─█▌░░████████████████████
-███████████████████▌░░░▀┬┼┼┼┼┼┼┼┬▀░░░▐███████████████████
-████████████████████▄░░░└┴┴┴┴┴┴┴┘░░░▄████████████████████
-██████████████████████▄░░░░░░░░░░░▄██████████████████████
-█████████████████████████▄▄▄▄▄▄▄█████████████████████████
-#+end_center
 ** Goals
 - vaporize boilerplate code and docs
 - integrate reasonably well with my tools (Emacs/etc)
@@ -66,13 +44,13 @@ current project directory (=*skel-project*=).
 #+begin_example
 usage: skel [global] <command> [<args>] -- <sxp>
 
-global options:
-  -q|--quiet    silence all output
-  -l|--log      set log level (debug,info,trace,warn)
-
 top-level options:
-  -h|--help     pring help
   -v|--version  print version
+  -h|--help     pring this message
+
+global options:
+  -l|--log      set log level (debug,info,trace,warn,FILE)
+  -q|--quiet    run quietly without printing
 
 commands:
   (build)

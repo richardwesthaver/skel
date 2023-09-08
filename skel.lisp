@@ -1,13 +1,13 @@
 ;;; skel.lisp --- skeletons library
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 (defpackage skel
-  (:use :cl :sxp :macs.fu :sb-mop :skel.make)
+  (:use :cl :sxp :fu :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
-   :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skel-file-extension*
-   :*skel-file-boundary* :find-skel-file :load-skel-file
+   :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
+   :*skelfile-boundary* :find-skelfile :load-skelfile
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project))
@@ -22,8 +22,8 @@
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "home/~a/.cache/skel" *default-skel-user*)))
 (defparameter *default-user-skel-config* (make-pathname :name (format nil "home/~a/.skelrc" *default-skel-user*)))
 (defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
-(defparameter *skel-file-extension* "sk")
-(defvar *skel-file-boundary* nil "Set an upper bounds on how many times and how far to walk an arbitrary
+(defparameter *skelfile-extension* "sk")
+(defvar *skelfile-boundary* nil "Set an upper bounds on how many times and how far to walk an arbitrary
 file directory.")
 
 ;;; UTIL
@@ -37,20 +37,6 @@ file directory.")
 	    (id :initarg :id :initform nil))
 	  `((id :initarg :id :initform nil)))
      (:documentation ,doc)))
-
-(defun find-skel-file (&key (start (getcwd)) (load nil) (name *default-skelfile*))
-  "Walk up the current directory returning the path to a 'skelfile', else
-return nil. When LOAD is non-nil, load the skelfile if found."
-  ;; Check the current path, if no skelfile found, walk up a level and
-  ;; continue until the `*skel-file-boundary*' is triggered.
-
-  (print start)
-  (print load)
-  (print name))
-
-(defun load-skel-file (file)
-  "Load the 'skelfile' FILE."
-  (sxp:read-sxp-file file))
 
 ;;; PROTO
 
@@ -89,11 +75,13 @@ via the special form stored in the `ast' slot."
   ((target :initarg :target :initform nil :type (or null sk-target))
    (source :initarg :source :initform nil :type (or null sk-source))
    (recipe :initarg :recipe :initform nil :type (or null sk-recipe))))
+
 (def-sk-class document "Document skeleton class.")
-(def-sk-class script "Document skeleton class.")
-(def-sk-class config "Document skeleton class.")
-(def-sk-class snippet "Document skeleton class.")
-(def-sk-class abbrev "Document skeleton class.")
+(def-sk-class script "Script skeleton class.")
+(def-sk-class config "Config skeleton class.")
+(def-sk-class snippet "Snippet skeleton class.")
+(def-sk-class abbrev "Abbrev skeleton class.")
+
 (def-sk-class project "Project skeleton class."
   (sk-meta)
   ((rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
@@ -114,3 +102,26 @@ via the special form stored in the `ast' slot."
   (let* ((cd (or path (getcwd))))
     (print cd stream)
     (terpri stream)))
+
+;;; Skelfile
+(defun init-skelfile (path)
+  (with-open-file (out path
+		       :direction :output
+		       :if-exists :error
+		       :if-does-not-exist :create)
+    (let ((obj (make-instance 'sk-project :ast "nada")))
+      (write-sxp-stream obj out))))
+
+(defun find-skelfile (&key (start (getcwd)) (load nil) (name *default-skelfile*))
+  "Walk up the current directory returning the path to a 'skelfile', else
+return nil. When LOAD is non-nil, load the skelfile if found."
+  ;; Check the current path, if no skelfile found, walk up a level and
+  ;; continue until the `*skelfile-boundary*' is triggered.
+
+  (print start)
+  (print load)
+  (print name))
+
+(defun load-skelfile (file)
+  "Load the 'skelfile' FILE."
+  (sxp:read-sxp-file file))

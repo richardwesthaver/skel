@@ -10,13 +10,13 @@
 
 (defvar *skel-help* "usage: skel [global] <command> [<args>] -- <sxp>
 
-global options:
-  -q|--quiet    silence all output
-  -l|--log      set log level (debug,info,trace,warn)
-
 top-level options:
-  -h|--help     pring help
   -v|--version  print version
+  -h|--help     pring this message
+
+global options:
+  -l|--log      set log level (debug,info,trace,warn,FILE)
+  -q|--quiet    run quietly without printing
 
 commands:
   (build)
@@ -47,6 +47,7 @@ commands:
       ((member "status" *argv* :test #'string=) (nyi!))
       ((member "-h" *argv* :test #'string=) (print-help *cli*))
       ((member "-v" *argv* :test #'string=) (print-version *cli*))
+      ((member "-f" *argv* :test #'string=) (nyi!))
       (t (describe-project)))))
        
 (defmain ()
