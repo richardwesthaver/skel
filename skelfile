@@ -7,7 +7,7 @@
       :rules
       ((build "skel.asd"
               ((asdf:make :skel/cli)))
-       (clean (#r"*.fasl" #p"skel")
-	      (rm -rf ,$src)))
+       (clean ("*.fasl" #p"skel")
+	      (rm -rf $src)))
       :abbrevs nil ;default
       :snippets nil)

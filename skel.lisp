@@ -4,6 +4,7 @@
   (:use :cl :sxp :fu :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
+  (:import-from :uiop :pathname-parent-directory-pathname)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
@@ -112,15 +113,32 @@ via the special form stored in the `ast' slot."
     (let ((obj (make-instance 'sk-project :ast "nada")))
       (write-sxp-stream obj out))))
 
-(defun find-skelfile (&key (start (getcwd)) (load nil) (name *default-skelfile*))
+(defun find-skelfile (&key (path (getcwd)) (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else
 return nil. When LOAD is non-nil, load the skelfile if found."
   ;; Check the current path, if no skelfile found, walk up a level and
   ;; continue until the `*skelfile-boundary*' is triggered.
+  (if walk 
+      (let ((root (find-project-root path name)))
+	(if root
+	    (if load
+		(load-skelfile (merge-pathnames name root))
+		(merge-pathnames name root))
+	    (warn "failed to find skelfile")))
+      (if-let ((sk (probe-file (merge-pathnames name path))))
+	(if load 
+	    (load-skelfile sk)
+	    sk)
+	(warn "failed to find skelfile"))))
 
-  (print start)
-  (print load)
-  (print name))
+(defun find-project-root (path name)
+  "Return PATH if it is a `skel-project' by checking for
+  NAME."
+  (if (probe-file (merge-pathnames name path))
+      path
+      (let ((next (pathname-parent-directory-pathname path)))
+	(when next 
+	  (find-project-root next name)))))
 
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
