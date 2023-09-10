@@ -1,5 +1,6 @@
 ;;; skel.lisp --- skeletons library
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
+
 (defpackage skel
   (:use :cl :sxp :fu :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
@@ -10,7 +11,8 @@
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
    :*skelfile-boundary* :find-skelfile :load-skelfile
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
-   :sk-type :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
+   :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document
+   :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project))
 
 (in-package :skel)
@@ -59,7 +61,7 @@ file directory.")
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
    (version :initarg :version :initform nil :type (or list string) :accessor sk-version)
-   (type :initarg :type :initform nil :accessor sk-type)
+   (kind :initarg :kind :initform nil :accessor sk-kind)
    (description :initarg :description :initform nil :type (or null string) :accessor sk-description))
   (:documentation "Meta skeleton class."))
    
@@ -91,6 +93,19 @@ via the special form stored in the `ast' slot."
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
+(defmethod sexpp ((self sk-project))
+  
+;; ast -> obj
+(defmethod load-ast ((self sk-project))
+  ;; internal ast is never tagged
+  (with-slots (ast) self
+    
+      )))
+
+;; obj -> ast
+(defmethod build-ast ((self sk-project))
+  (wrap self (wrap-object self :methods nil)))
+
 ;;; DBG
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
@@ -110,8 +125,12 @@ via the special form stored in the `ast' slot."
 		       :direction :output
 		       :if-exists :error
 		       :if-does-not-exist :create)
-    (let ((obj (make-instance 'sk-project :ast "nada")))
-      (write-sxp-stream obj out))))
+    (let ((obj (make-instance 'sk-project)))
+      (write-sxp-stream (build-ast obj) out))))
+
+(defun load-skelfile (file)
+  "Load the 'skelfile' FILE."
+  (sxp:read-sxp-file file))
 
 (defun find-skelfile (&key (path (getcwd)) (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else
@@ -139,7 +158,3 @@ return nil. When LOAD is non-nil, load the skelfile if found."
       (let ((next (pathname-parent-directory-pathname path)))
 	(when next 
 	  (find-project-root next name)))))
-
-(defun load-skelfile (file)
-  "Load the 'skelfile' FILE."
-  (sxp:read-sxp-file file))
