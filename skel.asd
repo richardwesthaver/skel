@@ -6,7 +6,7 @@
   :version "0.1.0"
   :maintainer "ellis <ellis@rwest.io>"
   :bug-tracker "https://lab.rwest.io/ellis/skel/issues"
-  :depends-on (:macs :sxp :organ :asdf/system)
+  :depends-on (:macs :sxp :organ :asdf)
   :in-order-to ((test-op (test-op skel/tests)))
   :components ((:file "asdf")
 	       (:file "make")

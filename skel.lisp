@@ -32,7 +32,8 @@ file directory.")
 ;;; COND
 (define-condition skel-syntax-error (sxp-syntax-error) ())
 
-(define-condition 
+(define-condition skel-fmt-error (sxp-fmt-error) ())
+
 ;;; UTIL
 (defmacro def-sk-class (name doc &optional superclasses slots)
   "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
@@ -46,6 +47,15 @@ file directory.")
      (:documentation ,doc)))
 
 ;;; PROTO
+
+(defgeneric sk-run (self))
+(defgeneric sk-init (self))
+(defgeneric sk-new (self))
+(defgeneric sk-save (self))
+(defgeneric sk-tangle (self))
+(defgeneric sk-weave (self))
+(defgeneric sk-call (self))
+(defgeneric sk-print (self))
 
 ;;; OBJ
 (defclass skel (sxp)
@@ -61,35 +71,69 @@ file directory.")
 		    (setf r (nconc r (list s (slot-value self s))))))
 	      r))))
 
+(defmethod initialize-instance ((self skel) &rest initargs &key &allow-other-keys)
+  (unless (getf initargs :id)
+    ;; TODO 2023-09-10: make fast
+    (setf (sk-id self) (sxhash self)))
+  (unless (getf initargs :path)
+    (setf (sk-path self) (getcwd)))
+  (call-next-method))
+
 (defclass sk-meta ()
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
    (version :initarg :version :initform nil :type (or list string) :accessor sk-version)
    (kind :initarg :kind :initform nil :accessor sk-kind)
    (description :initarg :description :initform nil :type (or null string) :accessor sk-description))
-  (:documentation "Meta skeleton class."))
+  (:documentation "Skel Meta class."))
    
-(def-sk-class command "Command skeleton class.")
-(def-sk-class target "Target skeleton class.")
-(def-sk-class source "Source skeleton class.")
-(def-sk-class recipe "Recipe skeleton class." ()
+(def-sk-class command
+  "Skel commands."
+  ())
+
+(def-sk-class target
+  "Target skeleton class."
+  ())
+
+(def-sk-class source
+  "Skel sources."
+  ())
+
+(def-sk-class recipe
+  "Skel recipes."
+  ()
   ((commands :initarg :commands :initform nil :type (or list (vector sk-command)))))
 
 (def-sk-class rule
-  "Rule skeleton class. Maps a `sk-source' to a corresponding `sk-target'
+  "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
 via the special form stored in the `ast' slot."
   ()
   ((target :initarg :target :initform nil :type (or null sk-target))
    (source :initarg :source :initform nil :type (or null sk-source))
    (recipe :initarg :recipe :initform nil :type (or null sk-recipe))))
 
-(def-sk-class document "Document skeleton class.")
-(def-sk-class script "Script skeleton class.")
-(def-sk-class config "Config skeleton class.")
-(def-sk-class snippet "Snippet skeleton class.")
-(def-sk-class abbrev "Abbrev skeleton class.")
+(def-sk-class document
+  "Skel Documents."
+  ())
 
-(def-sk-class project "Project skeleton class."
+(def-sk-class script
+  "Skel Scripts."
+  ())
+
+(def-sk-class config
+  "Skel Configs."
+  ())
+
+(def-sk-class snippet
+  "Skel Snippets."
+  ())
+
+(def-sk-class abbrev
+  "Skel Abbrevs."
+  ())
+
+(def-sk-class project
+  "Skel Projects."
   (sk-meta)
   ((rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
@@ -108,7 +152,7 @@ via the special form stored in the `ast' slot."
 
 ;; obj -> ast
 (defmethod build-ast ((self sk-project))
-  (wrap self (wrap-object self :methods nil)))
+  (wrap self (unwrap-object self :methods nil)))
 
 ;;; DBG
 (defun describe-skeleton (skel &optional (stream t))
