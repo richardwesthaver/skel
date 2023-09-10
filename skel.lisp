@@ -29,6 +29,10 @@
 (defvar *skelfile-boundary* nil "Set an upper bounds on how many times and how far to walk an arbitrary
 file directory.")
 
+;;; COND
+(define-condition skel-syntax-error (sxp-syntax-error) ())
+
+(define-condition 
 ;;; UTIL
 (defmacro def-sk-class (name doc &optional superclasses slots)
   "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."

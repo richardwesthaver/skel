@@ -1,6 +1,6 @@
 ;;; make.lisp --- GNU Makefile support for Skel
 
-;; This package contains a GNU Makefile compiler for SXP objects.
+;; This package contains a GNU Makefile compiler and classes.
 
 ;;; Commentary:
 
