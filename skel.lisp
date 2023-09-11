@@ -2,7 +2,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 
 (defpackage skel
-  (:use :cl :sxp :fu :sb-mop :skel.make)
+  (:use :cl :sxp :fu :fmt :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:import-from :uiop :pathname-parent-directory-pathname)
@@ -59,22 +59,18 @@ file directory.")
 
 ;;; OBJ
 (defclass skel (sxp)
-  ((id :initarg :id :initform nil :accessor sk-id))
+  ((id :initarg :id :initform 0 :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
 
 (defmethod print-object ((self skel) stream)
   (print-unreadable-object (self stream :type t)
-    (format stream "~{~a=~a~^, ~}"
-	    (let (r)
-	      (dolist (s (mapcar #'slot-definition-name (class-direct-slots (class-of self))) r)
-		(if (slot-boundp self s)
-		    (setf r (nconc r (list s (slot-value self s))))))
-	      r))))
+    (format stream "~S ~A" :id (fmt-sxhash (sk-id self)))))
 
 (defmethod initialize-instance ((self skel) &rest initargs &key &allow-other-keys)
   (unless (getf initargs :id)
-    ;; TODO 2023-09-10: make fast
-    (setf (sk-id self) (sxhash self)))
+    ;; TODO 2023-09-10: make fast 
+    (setf (sk-id self)
+	  (sxhash self)))
   (unless (getf initargs :path)
     (setf (sk-path self) (getcwd)))
   (call-next-method))
@@ -141,14 +137,13 @@ via the special form stored in the `ast' slot."
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
-(defmethod sexpp ((self sk-project))
+(defmethod sexpp ((self sk-project)))
   
 ;; ast -> obj
 (defmethod load-ast ((self sk-project))
   ;; internal ast is never tagged
   (with-slots (ast) self
-    
-      )))
+    ))
 
 ;; obj -> ast
 (defmethod build-ast ((self sk-project))
