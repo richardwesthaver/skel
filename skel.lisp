@@ -5,7 +5,7 @@
   (:use :cl :sxp :cond :fu :fmt :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
-  (:import-from :uiop :pathname-parent-directory-pathname)
+  (:shadowing-import-from :uiop/stream :pathname-parent-directory-pathname)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
