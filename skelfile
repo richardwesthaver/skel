@@ -1,13 +1,13 @@
-(skel :version "0.1.0" ;default
-      :author "Richard Westhaver <ellis@rwest.io>"
-      :description "spook scary skeletons"
-      :type lisp
-      :license "MPL"
-      :docs ("readme.org") ;default
-      :rules
-      ((build "skel.asd"
-              ((asdf:make :skel/cli)))
-       (clean ("*.fasl" #p"skel")
-	      (rm -rf $src)))
-      :abbrevs nil ;default
-      :snippets nil)
+(:version "0.1.0" ;default
+:author "Richard Westhaver <ellis@rwest.io>"
+:description "spook scary skeletons"
+:kind lisp
+:license "MPL"
+:documents ("readme.org") ;default
+:rules
+((build "skel.asd"
+        ((asdf:make :skel/cli)))
+ (clean ("*.fasl" #p"skel")
+	(rm -rf $src)))
+:abbrevs nil ;default
+:snippets nil)

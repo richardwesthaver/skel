@@ -2,7 +2,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 
 (defpackage skel
-  (:use :cl :sxp :fu :fmt :sb-mop :skel.make)
+  (:use :cl :sxp :cond :fu :fmt :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:import-from :uiop :pathname-parent-directory-pathname)
@@ -56,10 +56,10 @@ file directory.")
 (defgeneric sk-weave (self))
 (defgeneric sk-call (self))
 (defgeneric sk-print (self))
-
+(defgeneric rehash-object (self))
 ;;; OBJ
 (defclass skel (sxp)
-  ((id :initarg :id :initform 0 :accessor sk-id :type fixnum))
+  ((id :initarg :id :initform (required-argument :id) :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
 
 (defmethod print-object ((self skel) stream)
@@ -75,12 +75,19 @@ file directory.")
     (setf (sk-path self) (getcwd)))
   (call-next-method))
 
+;; TODO 2023-09-11: research other hashing strategies - maybe use the
+;; sxhash as a nonce for UUID
+(defmethod rehash-object ((self skel))
+  (setf (sk-id self) (sxhash self)))
+
 (defclass sk-meta ()
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
-   (version :initarg :version :initform nil :type (or list string) :accessor sk-version)
-   (kind :initarg :kind :initform nil :accessor sk-kind)
-   (description :initarg :description :initform nil :type (or null string) :accessor sk-description))
+   (author :initarg :author :type string :accessor sk-author)
+   (version :initarg :version :type string :accessor sk-version)
+   (kind :initarg :kind :accessor sk-kind)
+   (description :initarg :description :initform nil :type (or null string) :accessor sk-description)
+   (license :initarg :license :type :string :accessor sk-license))
   (:documentation "Skel Meta class."))
    
 (def-sk-class command
@@ -137,17 +144,23 @@ via the special form stored in the `ast' slot."
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
-(defmethod sexpp ((self sk-project)))
-  
 ;; ast -> obj
 (defmethod load-ast ((self sk-project))
   ;; internal ast is never tagged
   (with-slots (ast) self
-    ))
+    (if (formp ast)
+	;; ast is valid, modify object, set ast nil
+	(progn
+	  (sb-int:doplist (k v) ast
+	    (setf (slot-value self (symb k)) v))
+	  (setf (ast self) nil)
+	  self)
+	;; invalid ast, signal error
+	(error 'skel-syntax-error))))
 
 ;; obj -> ast
 (defmethod build-ast ((self sk-project))
-  (wrap self (unwrap-object self :methods nil)))
+  (setf (ast self) (unwrap-object self :methods nil)))
 
 ;;; DBG
 (defun describe-skeleton (skel &optional (stream t))
@@ -173,7 +186,9 @@ via the special form stored in the `ast' slot."
 
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
-  (sxp:read-sxp-file file))
+  (let ((form (read-file-form file)))
+    (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
+		 
 
 (defun find-skelfile (&key (path (getcwd)) (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else
