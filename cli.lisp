@@ -2,44 +2,29 @@
 
 ;;; Code:
 (defpackage skel.cli
-  (:use :cl :cond :cli :skel)
+  (:use :cl :cond :cli :skel :fmt)
   (:shadowing-import-from :sb-ext :defglobal)
   (:export :main))
 
 (in-package :skel.cli)
 
-(defvar *skel-help* "usage: skel [global] <command> [<args>] -- <sxp>
+(defvar *opts* (make-opts 
+		(:name help :description "print this message")
+		(:name version :description "print version")
+		(:name log :global t :description "set log level (debug,info,trace,warn)")
+		(:name input :description "input source")
+		(:name output :description "output target")))
 
-top-level options:
-  -v|--version  print version
-  -h|--help     pring this message
+(defvar *cmds* (make-cmds
+		(:name "status" :description "print the status of the current project")
+		(:name "build") run))
 
-global options:
-  -l|--log      set log level (debug,info,trace,warn,FILE)
-  -q|--quiet    run quietly without printing
-
-commands:
-  (build)
-  (run)
-  (test)
-  (check)
-  (deploy)
-  (init)
-  (new)
-  (make)
-  (compile)
-  (tangle)
-  (weave)
-")
-
-(defvar *opts* (make-opts help version log "file"))
-(defvar *cmds* (make-cmds status build run))
-(defparameter *cli*
+(defvar *cli*
   (make-cli t :name "skel"
 	      :version "0.1.1"
-	      :help *skel-help*
-	      :opts (make-opts help version log "file")
-	      :cmds (make-cmds status build run)))
+	      :description "nyaaaaa"
+	      :opts *opts*
+	      :cmds *cmds*))
 
 (defun run ()
   (with-cli (opts cmds) *cli*

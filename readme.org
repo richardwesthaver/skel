@@ -42,28 +42,22 @@ current project directory (=*skel-project*=).
 
 #+RESULTS:
 #+begin_example
-usage: skel [global] <command> [<args>] -- <sxp>
+skel v0.1.1
+  usage: skel [global] <command> [<arg>]
 
-top-level options:
-  -v|--version  print version
-  -h|--help     pring this message
+  nyaaaaa
 
-global options:
-  -l|--log      set log level (debug,info,trace,warn,FILE)
-  -q|--quiet    run quietly without printing
+  options:
+    HELP  :: print this message
+    VERSION  :: print version
+    LOG* :: set log level (debug,info,trace,warn)
+    INPUT  :: input source
+    OUTPUT  :: output target
 
-commands:
-  (build)
-  (run)
-  (test)
-  (check)
-  (deploy)
-  (init)
-  (new)
-  (make)
-  (compile)
-  (tangle)
-  (weave)
+  commands:
+    #<CLI-CMD status :opts 0 :cmds 0>
+    #<CLI-CMD build :opts 0 :cmds 0>
+    #<CLI-CMD run :opts 0 :cmds 0>
 #+end_example
 
 * API

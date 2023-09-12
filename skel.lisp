@@ -5,7 +5,7 @@
   (:use :cl :sxp :cond :fu :fmt :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
-  (:shadowing-import-from :uiop/stream :pathname-parent-directory-pathname)
+  (:shadowing-import-from :uiop :pathname-parent-directory-pathname)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
@@ -188,7 +188,6 @@ via the special form stored in the `ast' slot."
   "Load the 'skelfile' FILE."
   (let ((form (read-file-form file)))
     (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
-		 
 
 (defun find-skelfile (&key (path (getcwd)) (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else
