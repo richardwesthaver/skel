@@ -9,15 +9,16 @@
 (in-package :skel.cli)
 
 (defvar *opts* (make-opts 
-		(:name help :description "print this message")
-		(:name version :description "print version")
-		(:name log :global t :description "set log level (debug,info,trace,warn)")
-		(:name input :description "input source")
-		(:name output :description "output target")))
+		'(:name help :description "print this message")
+		'(:name version :description "print version")
+		'(:name log :global t :description "set log level (debug,info,trace,warn)")
+		'(:name input :description "input source")
+		'(:name output :description "output target")))
 
 (defvar *cmds* (make-cmds
-		(:name "status" :description "print the status of the current project")
-		(:name "build") run))
+		'(:name status :description "print the status of the current project")
+		`(:name build :opts ,(make-opts '(:name target :description "target to build")))
+		'(:name run)))
 
 (defvar *cli*
   (make-cli t :name "skel"

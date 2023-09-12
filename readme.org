@@ -48,16 +48,17 @@ skel v0.1.1
   nyaaaaa
 
   options:
-    HELP  :: print this message
-    VERSION  :: print version
-    LOG* :: set log level (debug,info,trace,warn)
-    INPUT  :: input source
-    OUTPUT  :: output target
+    HELP   print this message
+    VERSION   print version
+    LOG*  set log level (debug,info,trace,warn)
+    INPUT   input source
+    OUTPUT   output target
 
   commands:
-    #<CLI-CMD status :opts 0 :cmds 0>
-    #<CLI-CMD build :opts 0 :cmds 0>
-    #<CLI-CMD run :opts 0 :cmds 0>
+    STATUS  print the status of the current project
+    BUILD  
+    -  TARGET   target to build
+    RUN  
 #+end_example
 
 * API
