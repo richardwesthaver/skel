@@ -5,7 +5,7 @@
   (:use :cl :sxp :cond :fu :fmt :sb-mop :skel.make)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
-  (:import-from :uiop :pathname-parent-directory-pathname)
+  (:shadowing-import-from :uiop :pathname-parent-directory-pathname :read-file-form)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
@@ -152,7 +152,7 @@ via the special form stored in the `ast' slot."
 	;; ast is valid, modify object, set ast nil
 	(progn
 	  (sb-int:doplist (k v) ast
-	    (setf (slot-value self (symb k)) v))
+	    (setf (slot-value self (intern (symbol-name k) :skel)) v))
 	  (setf (ast self) nil)
 	  self)
 	;; invalid ast, signal error
@@ -189,19 +189,19 @@ via the special form stored in the `ast' slot."
   (let ((form (read-file-form file)))
     (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
 
-(defun find-skelfile (&key (path (getcwd)) (load nil) (name *default-skelfile*) (walk t))
+(defun find-skelfile (start &key (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else
 return nil. When LOAD is non-nil, load the skelfile if found."
   ;; Check the current path, if no skelfile found, walk up a level and
   ;; continue until the `*skelfile-boundary*' is triggered.
   (if walk 
-      (let ((root (find-project-root path name)))
+      (let ((root (find-project-root (make-pathname :directory (pathname-directory start)) name)))
 	(if root
 	    (if load
 		(load-skelfile (merge-pathnames name root))
 		(merge-pathnames name root))
 	    (warn "failed to find skelfile")))
-      (if-let ((sk (probe-file (merge-pathnames name path))))
+      (if-let ((sk (probe-file (merge-pathnames name start))))
 	(if load 
 	    (load-skelfile sk)
 	    sk)
@@ -212,6 +212,6 @@ return nil. When LOAD is non-nil, load the skelfile if found."
   NAME."
   (if (probe-file (merge-pathnames name path))
       path
-      (let ((next (pathname-parent-directory-pathname path)))
-	(when next 
-	  (find-project-root next name)))))
+      (if-let ((next (pathname-parent-directory-pathname path)))
+	(find-project-root next name)
+	(warn "failed to find project root"))))

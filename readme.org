@@ -37,7 +37,7 @@ Run the binary without any args, which will print a skeleton of the
 current project directory (=*skel-project*=).
 
 #+begin_src shell :results output replace :exports both
-./skel -h
+  ./skel -h
 #+end_src
 
 #+RESULTS:
@@ -45,20 +45,49 @@ current project directory (=*skel-project*=).
 skel v0.1.1
   usage: skel [global] <command> [<arg>]
 
-  nyaaaaa
+  the hacker's project management tool.
 
   options:
-    HELP   print this message
-    VERSION   print version
-    LOG*  set log level (debug,info,trace,warn)
-    INPUT   input source
-    OUTPUT   output target
+     -h/help  :  print this message
+     -v/version  :  print version
+     -l/log* :  set log level (debug,info,trace,warn)
+     -i/input  :  input source
+     -o/output  :  output target
 
   commands:
-    STATUS  print the status of the current project
-    BUILD  
-    -  TARGET   target to build
-    RUN  
+    status  :  print the status of the current project
+    describe  :  describe the project skelfile
+     -f/file  :  path to skelfile
+    build  :  build artifacts
+     -t/target  :  target artifact to build
+    run  
+#+end_example
+
+
+#+begin_src shell :results output replace :exports both
+  ./skel describe
+#+end_src
+
+#+RESULTS:
+#+begin_example
+#<SK-PROJECT :ID 2d60-75b9-7988-a78c>
+  [standard-object]
+
+Slots with :INSTANCE allocation:
+  NAME                           = "skel"
+  PATH                           = "/home/ellis/dev/skel"
+  AUTHOR                         = "Richard Westhaver <ellis@rwest.io>"
+  VERSION                        = "0.1.0"
+  KIND                           = LISP
+  DESCRIPTION                    = "spook scary skeletons"
+  LICENSE                        = "MPL"
+  AST                            = NIL
+  ID                             = 3269742768939378572
+  RULES                          = ((BUILD "skel.asd" ((ASDF/OPERATE:MAKE :SKEL/CLI)))..
+  DOCUMENTS                      = ("readme.org")
+  SCRIPTS                        = NIL
+  SNIPPETS                       = NIL
+  ABBREVS                        = NIL
 #+end_example
 
 * API
