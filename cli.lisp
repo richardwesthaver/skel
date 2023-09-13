@@ -18,6 +18,10 @@
 (defvar *cmds* (make-cmds
 		'(:name status
 		  :description "print the status of the current project")
+		`(:name init
+		  :description "initialize a skelfile in the current directory"
+		  :opts ,(make-opts '(:name name :description "project name")
+				    '(:name kind :description "project kind")))
 		`(:name describe
 		  :description "describe the project skelfile"
 		  :opts ,(make-opts '(:name file :description "path to skelfile")))

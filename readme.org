@@ -48,18 +48,21 @@ skel v0.1.1
   the hacker's project management tool.
 
   options:
-     -h/help  :  print this message
-     -v/version  :  print version
-     -l/log* :  set log level (debug,info,trace,warn)
-     -i/input  :  input source
-     -o/output  :  output target
+     -h/--help  :  print this message
+     -v/--version  :  print version
+     -l/--log* :  set log level (debug,info,trace,warn)
+     -i/--input  :  input source
+     -o/--output  :  output target
 
   commands:
     status  :  print the status of the current project
+    init  :  initialize a skelfile in the current directory
+     -n/--name  :  project name
+     -k/--kind  :  project kind
     describe  :  describe the project skelfile
-     -f/file  :  path to skelfile
+     -f/--file  :  path to skelfile
     build  :  build artifacts
-     -t/target  :  target artifact to build
+     -t/--target  :  target artifact to build
     run  
 #+end_example
 
