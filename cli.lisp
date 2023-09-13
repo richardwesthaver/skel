@@ -33,7 +33,7 @@
 (defvar *cli*
   (make-cli t :name "skel"
 	      :version "0.1.1"
-	      :description "the hacker's project management tool."
+	      :description "A hacker's project compiler and build tool."
 	      :opts *opts*
 	      :cmds *cmds*))
 

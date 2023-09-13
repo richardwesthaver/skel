@@ -45,7 +45,7 @@ current project directory (=*skel-project*=).
 skel v0.1.1
   usage: skel [global] <command> [<arg>]
 
-  the hacker's project management tool.
+  A hacker's project compiler and build tool.
 
   options:
      -h/--help  :  print this message
