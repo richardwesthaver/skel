@@ -41,9 +41,8 @@
       ((member "-h" *argv* :test #'string=) (print-help *cli*))
       ((member "-v" *argv* :test #'string=) (print-version *cli*))
       ((member "-f" *argv* :test #'string=) (nyi!))
-      (t (describe-project)))))
+      (t (print-help *cli*)))))
        
 (defmain ()
-  (in-package :skel)
   (run)
   (sb-ext:exit :code 0))

@@ -70,7 +70,7 @@ skel v0.1.1
 
 #+RESULTS:
 #+begin_example
-#<SK-PROJECT :ID 2d60-75b9-7988-a78c>
+#<SKEL:SK-PROJECT :ID 2d60-75b9-7988-a78c>
   [standard-object]
 
 Slots with :INSTANCE allocation:
