@@ -184,12 +184,19 @@ via the special form stored in the `ast' slot."
 	(error 'skel-syntax-error))))
 
 ;; obj -> ast
-(defmethod build-ast ((self sk-project) &key (nullp nil))
-  (setf (ast self) (unwrap-object self :slots t :methods nil :nullp nullp)))
+(defmethod build-ast ((self sk-project) &key (nullp nil) (exclude '(ast id name)))
+  (setf (ast self)
+	(cons
+	 (sk-name self)
+	 (unwrap-object self
+			:slots t
+			:methods nil
+			:nullp nullp
+			:exclude exclude))))
 
 (defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase))
-  (write (ast self) :stream stream :pretty pretty :case case))
-  
+  (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))
+
 (defun make-header-comment (name &key (timestamp nil) (description nil) (opts nil))
   (format nil ";;; ~A~A~A~A~%" name
 	  (if timestamp
@@ -217,7 +224,7 @@ via the special form stored in the `ast' slot."
 			  (sk-name self)
 			  :timestamp t
 			  :description (sk-description self)
-			  :opts nil)
+			  :opts '("mode: skel;"))
 			 out))
 	  (write-sxp-stream self out))
       (setf ast nil))))

@@ -1,9 +1,4 @@
-;;; skel @ 2023-09-14.00:40:11 --- spook scary skeletons
-((:name "skel") (:path "/home/ellis/dev/skel")
- (:author "Richard Westhaver <ellis@rwest.io>") (:version "0.1.0") (:kind lisp)
- (:description "spook scary skeletons") (:license "MPL")
- (:id 3269742768939378572) (:vc :hg)
- (:rules
-  ((build "skel.asd" ((asdf/operate:make :skel/cli)))
-   (clean ("*.fasl" #P"skel") (rm -rf $src))))
- (:documents ("readme.org")))
+;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
+(skel (:path "~/dev/skel") (:author "Richard Westhaver <ellis@rwest.io>")
+      (:kind :lisp) (:description "A hacker's project compiler") (:license "MPL")
+      (:vc :hg))
