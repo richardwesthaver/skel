@@ -1,14 +1,9 @@
-(:name "skel"
- :version "0.1.0" ;default
- :author "Richard Westhaver <ellis@rwest.io>"
- :description "spook scary skeletons"
- :kind lisp
- :license "MPL"
- :documents ("readme.org") ;default
- :rules
- ((build "skel.asd"
-         ((asdf:make :skel/cli)))
-  (clean ("*.fasl" #p"skel")
-	 (rm -rf $src)))
- :abbrevs nil ;default
- :snippets nil)
+;;; skel @ 2023-09-14.00:40:11 --- spook scary skeletons
+((:name "skel") (:path "/home/ellis/dev/skel")
+ (:author "Richard Westhaver <ellis@rwest.io>") (:version "0.1.0") (:kind lisp)
+ (:description "spook scary skeletons") (:license "MPL")
+ (:id 3269742768939378572) (:vc :hg)
+ (:rules
+  ((build "skel.asd" ((asdf/operate:make :skel/cli)))
+   (clean ("*.fasl" #P"skel") (rm -rf $src))))
+ (:documents ("readme.org")))

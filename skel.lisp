@@ -1,4 +1,4 @@
-;;; skel.lisp --- skeletons library
+;;; skel.lisp --- skeleton library
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 
 (defpackage skel
@@ -17,37 +17,54 @@
 
 (in-package :skel)
 
-;;; VARS
-(defparameter *skel-project* nil)
-(defparameter *skel-project-registry* nil)
+;;; Vars
+(deftype vc-designator () '(member :hg :git nil))
+
+(declaim
+ (type sk-project *skel-project*)
+ (type string *default-skelfile* *default-skel-user* *skelfile-extension*)
+ (type pathname *default-skel-cache* *default-user-skel-config* *default-global-skel-config*)
+ (type vc-designator *default-skel-vc*))
+
+(defvar *skel-project*)
+
+;; TODO (defparameter *skel-project-registry* nil)
+
+;; TODO (defvar *skelfile-boundary* nil "Set an upper bounds on how
+;; many times and how far to walk an arbitrary file directory.")
+
 (defparameter *default-skelfile* "skelfile")
 (defparameter *default-skel-user* (uid-username (getuid)))
+(defparameter *skelfile-extension* "sk")
+
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "home/~a/.cache/skel" *default-skel-user*)))
 (defparameter *default-user-skel-config* (make-pathname :name (format nil "home/~a/.skelrc" *default-skel-user*)))
 (defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
-(defparameter *skelfile-extension* "sk")
-(defvar *skelfile-boundary* nil "Set an upper bounds on how many times and how far to walk an arbitrary
-file directory.")
 
-;;; COND
+(defparameter *default-skel-vc* :hg)
+
+;;; Conditions
 (define-condition skel-syntax-error (sxp-syntax-error) ())
 
 (define-condition skel-fmt-error (sxp-fmt-error) ())
 
-;;; UTIL
-(defmacro def-sk-class (name doc &optional superclasses slots)
-  "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
+;;; Macros
+(defmacro %def-sk-class (name doc superclasses slots)
   `(defclass ,(symb 'sk- name)
-       ,(if superclasses `(skel ,@superclasses) '(skel))
-     ;; TODO 2023-08-26: 
-     ,(if slots
-	  `(,@slots
-	    (id :initarg :id :initform nil))
-	  `((id :initarg :id :initform nil)))
+       ,superclasses
+     ,slots
      (:documentation ,doc)))
 
-;;; PROTO
+(defmacro def-sk-class (name doc &optional superclasses slots)
+  "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
+  `(%def-sk-class
+    ,name ,doc
+    ,(if superclasses `(skel ,@superclasses) '(skel))
+     ;; TODO 2023-08-26: 
+    ,(when slots
+	 `(,@slots))))
 
+;;; Proto
 (defgeneric sk-run (self))
 (defgeneric sk-init (self))
 (defgeneric sk-new (self))
@@ -57,7 +74,8 @@ file directory.")
 (defgeneric sk-call (self))
 (defgeneric sk-print (self))
 (defgeneric rehash-object (self))
-;;; OBJ
+(defgeneric init-skelfile (self &key path &allow-other-keys))
+;;; Objects
 (defclass skel (sxp)
   ((id :initarg :id :initform (required-argument :id) :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
@@ -135,13 +153,20 @@ via the special form stored in the `ast' slot."
   "Skel Abbrevs."
   ())
 
-(def-sk-class project
-  "Skel Projects."
+(def-sk-class vc-meta
+  "Skel Version Control systems."
   (sk-meta)
+  ((vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)))
+
+(%def-sk-class project
+  "Skel Projects."
+  (sk-vc-meta)
   ((rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
+   (stash :initarg :stash :initform nil :accessor sk-stash :type (or null pathname))
+   (shed :initarg :shed :initform nil :accessor sk-shed :type (or null pathname))
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
 ;; ast -> obj
@@ -159,10 +184,45 @@ via the special form stored in the `ast' slot."
 	(error 'skel-syntax-error))))
 
 ;; obj -> ast
-(defmethod build-ast ((self sk-project))
-  (setf (ast self) (unwrap-object self :methods nil)))
+(defmethod build-ast ((self sk-project) &key (nullp nil))
+  (setf (ast self) (unwrap-object self :slots t :methods nil :nullp nullp)))
 
-;;; DBG
+(defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase))
+  (write (ast self) :stream stream :pretty pretty :case case))
+  
+(defun make-header-comment (name &key (timestamp nil) (description nil) (opts nil))
+  (format nil ";;; ~A~A~A~A~%" name
+	  (if timestamp
+	      (multiple-value-bind (s m h d mo y) (decode-universal-time (get-universal-time) 0)
+	      (format nil " @ ~4,'0d-~2,'0d-~2,'0d.~2,'0d:~2,'0d:~2,'0d" y mo d h m s))
+	      "")
+	  (if description
+	      (format nil " --- ~A" description)
+	      "")
+	  (if opts
+	      (format nil " -*- ~{~A~^;~} -*-" opts)
+	      "")))
+
+;; ast -> file
+(defmethod init-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t))
+  (with-slots (ast) self
+    (build-ast self :nullp nullp)
+    (prog1 
+	(with-open-file (out path
+			     :direction :output
+			     :if-exists :error
+			     :if-does-not-exist :create)
+	  (when comment (princ
+			 (make-header-comment
+			  (sk-name self)
+			  :timestamp t
+			  :description (sk-description self)
+			  :opts nil)
+			 out))
+	  (write-sxp-stream self out))
+      (setf ast nil))))
+
+;;; Debug
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
   (print-object skel stream)
@@ -175,15 +235,7 @@ via the special form stored in the `ast' slot."
     (print cd stream)
     (terpri stream)))
 
-;;; Skelfile
-(defun init-skelfile (path)
-  (with-open-file (out path
-		       :direction :output
-		       :if-exists :error
-		       :if-does-not-exist :create)
-    (let ((obj (make-instance 'sk-project)))
-      (write-sxp-stream (build-ast obj) out))))
-
+;;; Functions
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
   (let ((form (read-file-form file)))
@@ -212,6 +264,7 @@ return nil. When LOAD is non-nil, load the skelfile if found."
   NAME."
   (if (probe-file (merge-pathnames name path))
       path
-      (if-let ((next (pathname-parent-directory-pathname path)))
-	(find-project-root next name)
-	(warn "failed to find project root"))))
+      (let ((next (pathname-parent-directory-pathname path)))
+	(if (eql path next)
+	    (find-project-root next name)
+	    (warn "failed to find project root")))))
