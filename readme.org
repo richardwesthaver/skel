@@ -101,6 +101,7 @@ Slots with :INSTANCE allocation:
     sk [label="(skel :ID :AST)"]
     methods [label="(sk-compile sk-expand sk-build\nsk-run sk-init sk-new sk-save\nsk-tangle sk-weave sk-call sk-print)"]
     skmet [label="(sk-meta :NAME :PATH :VERSION :DESCRIPTION)"]
+    skvcs [label="(sk-vc-meta :VC)"]
     skcmd [label="(sk-command)"]
     sktar [label="(sk-target)"]
     sksrc [label="(sk-source)"]
@@ -113,6 +114,7 @@ Slots with :INSTANCE allocation:
     skabb [label="(sk-abbrev)"]
     skpro [label="(sk-project\l:RULES\l:DOCUMENTS\l:SCRIPTS\l:SNIPPETS\l:ABBREVS)\l"]
     sk -> skmet
+    skmet -> skvcs
     sk -> skcfg
     sk -> sksni
     sk -> skabb
@@ -120,7 +122,7 @@ Slots with :INSTANCE allocation:
     sk -> skrul
     sk -> sksrc
     sk -> skcmd
-    skmet -> skpro
+    skvcs -> skpro
     skmet -> skdoc    
     skmet -> skscr    
     skrul -> skpro

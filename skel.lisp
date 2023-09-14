@@ -98,7 +98,7 @@
 (defmethod rehash-object ((self skel))
   (setf (sk-id self) (sxhash self)))
 
-(defclass sk-meta ()
+(defclass sk-meta (skel)
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
    (author :initarg :author :type string :accessor sk-author)
@@ -153,7 +153,7 @@ via the special form stored in the `ast' slot."
   "Skel Abbrevs."
   ())
 
-(def-sk-class vc-meta
+(%def-sk-class vc-meta
   "Skel Version Control systems."
   (sk-meta)
   ((vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)))
