@@ -6,11 +6,13 @@
   :version "0.1.0"
   :maintainer "ellis <ellis@rwest.io>"
   :bug-tracker "https://lab.rwest.io/ellis/skel/issues"
-  :depends-on (:uiop :macs :sxp :organ)
+  :depends-on (:uiop :sb-posix :sb-bsd-sockets :macs :sxp :organ)
   :in-order-to ((test-op (test-op skel/tests)))
-  :components ((:file "asdf")
-	       (:file "make")
-	       (:file "skel")))
+  :serial t
+  :components ((:file "skel")
+	       (:file "vc")
+	       (:file "asdf")
+	       (:file "make")))
 
 (defsystem "skel/cli"
   :depends-on (:skel :macs)

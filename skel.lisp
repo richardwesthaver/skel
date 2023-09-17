@@ -2,7 +2,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 
 (defpackage skel
-  (:use :cl :sxp :cond :fu :fmt :sb-mop :skel.make)
+  (:use :cl :sxp :cond :fu :fmt :sb-mop)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:shadowing-import-from :uiop :pathname-parent-directory-pathname :read-file-form)
@@ -11,7 +11,7 @@
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
    :*skelfile-boundary* :find-skelfile :load-skelfile
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
-   :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document
+   :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-command
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project))
 
@@ -22,7 +22,7 @@
 
 (declaim
  (type sk-project *skel-project*)
- (type string *default-skelfile* *default-skel-user* *skelfile-extension*)
+ (type string *default-skel-user* *default-skelfile* *skelfile-extension*)
  (type pathname *default-skel-cache* *default-user-skel-config* *default-global-skel-config*)
  (type vc-designator *default-skel-vc*))
 
@@ -33,8 +33,9 @@
 ;; TODO (defvar *skelfile-boundary* nil "Set an upper bounds on how
 ;; many times and how far to walk an arbitrary file directory.")
 
-(defparameter *default-skelfile* "skelfile")
 (defparameter *default-skel-user* (uid-username (getuid)))
+
+(defparameter *default-skelfile* "skelfile")
 (defparameter *skelfile-extension* "sk")
 
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "home/~a/.cache/skel" *default-skel-user*)))
@@ -48,22 +49,6 @@
 
 (define-condition skel-fmt-error (sxp-fmt-error) ())
 
-;;; Macros
-(defmacro %def-sk-class (name doc superclasses slots)
-  `(defclass ,(symb 'sk- name)
-       ,superclasses
-     ,slots
-     (:documentation ,doc)))
-
-(defmacro def-sk-class (name doc &optional superclasses slots)
-  "Define a new class with superclass of (`skel' . SUPERCLASSES), SLOTS, DOC, and NAME."
-  `(%def-sk-class
-    ,name ,doc
-    ,(if superclasses `(skel ,@superclasses) '(skel))
-     ;; TODO 2023-08-26: 
-    ,(when slots
-	 `(,@slots))))
-
 ;;; Proto
 (defgeneric sk-run (self))
 (defgeneric sk-init (self))
@@ -75,8 +60,9 @@
 (defgeneric sk-print (self))
 (defgeneric rehash-object (self))
 (defgeneric init-skelfile (self &key path &allow-other-keys))
+(defgeneric sk-transform (self other &key &allow-other-keys))
 ;;; Objects
-(defclass skel (sxp)
+(defclass skel ()
   ((id :initarg :id :initform (required-argument :id) :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
 
@@ -89,8 +75,6 @@
     ;; TODO 2023-09-10: make fast 
     (setf (sk-id self)
 	  (sxhash self)))
-  (unless (getf initargs :path)
-    (setf (sk-path self) (getcwd)))
   (call-next-method))
 
 ;; TODO 2023-09-11: research other hashing strategies - maybe use the
@@ -98,7 +82,8 @@
 (defmethod rehash-object ((self skel))
   (setf (sk-id self) (sxhash self)))
 
-(defclass sk-meta (skel)
+;; note that the sk-meta class does not inherit from skel or sxp.
+(defclass sk-meta ()
   ((name :initarg :name :initform nil :type (or null string) :accessor sk-name)
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
    (author :initarg :author :type string :accessor sk-author)
@@ -107,61 +92,53 @@
    (description :initarg :description :initform nil :type (or null string) :accessor sk-description)
    (license :initarg :license :type :string :accessor sk-license))
   (:documentation "Skel Meta class."))
-   
-(def-sk-class command
-  "Skel commands."
+ 
+(defmethod initialize-instance ((self sk-meta) &rest initargs &key &allow-other-keys)
+  (unless (getf initargs :path)
+    (setf (sk-path self) (getcwd)))
+  (call-next-method))
+
+(defclass sk-command (skel)
   ())
 
-(def-sk-class target
-  "Target skeleton class."
+(defclass sk-target (skel)
   ())
 
-(def-sk-class source
-  "Skel sources."
+(defclass sk-source (skel)
   ())
 
-(def-sk-class recipe
-  "Skel recipes."
-  ()
-  ((commands :initarg :commands :initform nil :type (or list (vector sk-command)))))
+(defclass sk-recipe (skel)
+  ((commands :initarg :commands :initform nil :type (or list (vector sk-command)) :accessor sk-commands)))
 
-(def-sk-class rule
-  "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
-via the special form stored in the `ast' slot."
-  ()
+(defclass sk-rule (skel)
   ((target :initarg :target :initform nil :type (or null sk-target))
    (source :initarg :source :initform nil :type (or null sk-source))
-   (recipe :initarg :recipe :initform nil :type (or null sk-recipe))))
+   (recipe :initarg :recipe :initform nil :type (or null sk-recipe)))
+  (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
+via the special form stored in the `ast' slot."))
 
-(def-sk-class document
-  "Skel Documents."
+(defclass sk-document (skel)
   ())
 
-(def-sk-class script
-  "Skel Scripts."
+(defclass sk-script (skel)
   ())
 
-(def-sk-class config
-  "Skel Configs."
+(defclass sk-config (skel)
   ())
 
-(def-sk-class snippet
-  "Skel Snippets."
+(defclass sk-snippet (skel)
   ())
 
-(def-sk-class abbrev
-  "Skel Abbrevs."
+(defclass sk-abbrev (skel)
   ())
 
-(%def-sk-class vc-meta
-  "Skel Version Control systems."
-  (sk-meta)
-  ((vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)))
+(defclass sk-vc-meta (sk-meta)
+  ()
+  (:documentation "Skel Version Control systems."))
 
-(%def-sk-class project
-  "Skel Projects."
-  (sk-vc-meta)
-  ((rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
+(defclass sk-project (skel sxp sk-meta)
+  ((vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)
+   (rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
