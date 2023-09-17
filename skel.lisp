@@ -9,7 +9,8 @@
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
-   :*skelfile-boundary* :find-skelfile :load-skelfile
+   :make-file-header :make-shebang-file-header :make-source-file-header :file-header-kind
+   :make-source-header-comment :make-shebang-comment :*skelfile-boundary* :find-skelfile :load-skelfile
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-command
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
@@ -174,11 +175,30 @@ via the special form stored in the `ast' slot."))
 (defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase))
   (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))
 
-(defun make-header-comment (name &key (timestamp nil) (description nil) (opts nil))
+(deftype file-header-kind () '(member :source :shebang))
+
+(declaim (inline %make-file-header))
+(defstruct (file-header (:constructor %make-file-header)
+			   (:conc-name sk-fh-))
+  (kind :source :type file-header-kind)
+  (str "" :type string))
+
+(defun make-file-header (kind string)
+  (%make-file-header :kind kind :str (or string "")))
+
+(defun make-source-file-header (str)
+  (make-file-header :source str))
+
+(defun make-shebang-file-header (str)
+  (make-file-header :shebang str))
+
+;; TODO 2023-09-17: this should be a struct I think - file-header maybe?
+(defun make-source-header-comment (name &key (timestamp nil) (description nil) (opts nil))
+  "Generate a generic file-header with optional timestamp, description, and opts."
   (format nil ";;; ~A~A~A~A~%" name
 	  (if timestamp
 	      (multiple-value-bind (s m h d mo y) (decode-universal-time (get-universal-time) 0)
-	      (format nil " @ ~4,'0d-~2,'0d-~2,'0d.~2,'0d:~2,'0d:~2,'0d" y mo d h m s))
+		(format nil " @ ~4,'0d-~2,'0d-~2,'0d.~2,'0d:~2,'0d:~2,'0d" y mo d h m s))
 	      "")
 	  (if description
 	      (format nil " --- ~A" description)
@@ -186,6 +206,10 @@ via the special form stored in the `ast' slot."))
 	  (if opts
 	      (format nil " -*- ~{~A~^;~} -*-" opts)
 	      "")))
+
+(defun make-shebang-comment (shell &rest args)
+  "Generate a shebang file-header line."
+  (format nil "#~A ~{~A~^ ~}~%" shell args))
 
 ;; ast -> file
 (defmethod init-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t))
@@ -197,7 +221,7 @@ via the special form stored in the `ast' slot."))
 			     :if-exists :error
 			     :if-does-not-exist :create)
 	  (when comment (princ
-			 (make-header-comment
+			 (make-source-header-comment
 			  (sk-name self)
 			  :timestamp t
 			  :description (sk-description self)
