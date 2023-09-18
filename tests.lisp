@@ -6,7 +6,13 @@
 (defsuite skel.tests)
 (in-suite skel.tests)
 
-(deftest sanity ())
+(deftest sanity ()
+  (defun skels (c)
+    (let ((s))
+      (loop for i from 1 to c
+	    do (push (sk-id (make-instance 'sk-project)) s))
+      s))
+  (is (apply '/= (skels 10000))))
 
 (deftest header-comments ()
   "Make sure header comments are generated correctly. 
