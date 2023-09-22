@@ -5,7 +5,7 @@
   (:use :cl :sxp :cond :fu :fmt :sb-mop)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
-  (:shadowing-import-from :uiop :pathname-parent-directory-pathname :read-file-form)
+  (:shadowing-import-from :uiop :pathname-parent-directory-pathname :read-file-forms)
   (:export
    :*skel-project* :*skel-project-registry* :*default-skelfile* :*default-skel-user* 
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
@@ -74,8 +74,8 @@
 (defmethod initialize-instance ((self skel) &rest initargs &key &allow-other-keys)
   (unless (getf initargs :id)
     ;; TODO 2023-09-10: make fast 
-    (setf (sk-id self)
-	  (sxhash self)))
+    (with-slots (id) self
+      (sxhash self)))
   (call-next-method))
 
 ;; TODO 2023-09-11: research other hashing strategies - maybe use the
@@ -246,7 +246,9 @@ via the special form stored in the `ast' slot."))
 ;;; Functions
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
-  (let ((form (read-file-form file)))
+  (let ((form (read-file-forms file)))
+    (when (= 1 (length form)) ;; a single form - unwrap it
+      (setq form (car form)))
     (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
 
 (defun find-skelfile (start &key (load nil) (name *default-skelfile*) (walk t))

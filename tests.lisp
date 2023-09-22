@@ -3,16 +3,17 @@
   (:use :cl :skel :macs.rt))
 (in-package :skel.tests)
 
-(defsuite skel.tests)
-(in-suite skel.tests)
+(defsuite :skel)
+(in-suite :skel)
+
+(defun skels (c)
+  (let ((s))
+    (loop for i from 1 to c
+	  do (push (sk-id (make-instance 'sk-project)) s))
+    s))
 
 (deftest sanity ()
-  (defun skels (c)
-    (let ((s))
-      (loop for i from 1 to c
-	    do (push (sk-id (make-instance 'sk-project)) s))
-      s))
-  (is (apply '/= (skels 10000))))
+  (is (eq t (apply #'/= (skels 10000)))))
 
 (deftest header-comments ()
   "Make sure header comments are generated correctly. 

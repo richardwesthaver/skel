@@ -66,6 +66,27 @@ skel v0.1.1
     run  
 #+end_example
 
+Here's skel's skelfile:
+
+#+begin_src shell :results output replace :wrap src skel :exports results
+cat skelfile
+#+end_src
+
+#+RESULTS:
+#+begin_src skel
+;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
+:name skel
+:path "~/dev/skel"
+:version "0.1.0"
+:author "Richard Westhaver <ellis@rwest.io>"
+:kind :lisp
+:description "A hacker's project compiler"
+:license "MPL"
+:vc :hg
+#+end_src
+
+This is just a form without the top-level parentheses - you're free to
+omit them in a skelfile.
 
 #+begin_src shell :results output replace :exports both
   ./skel describe
@@ -73,26 +94,34 @@ skel v0.1.1
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 2d60-75b9-7988-a78c>
+#<SKEL:SK-PROJECT :ID 30cc-20ed-e3bc-ad08>
   [standard-object]
 
 Slots with :INSTANCE allocation:
-  NAME                           = "skel"
-  PATH                           = "/home/ellis/dev/skel"
+  NAME                           = SKEL
+  PATH                           = "~/dev/skel"
   AUTHOR                         = "Richard Westhaver <ellis@rwest.io>"
   VERSION                        = "0.1.0"
-  KIND                           = LISP
-  DESCRIPTION                    = "spook scary skeletons"
+  KIND                           = :LISP
+  DESCRIPTION                    = "A hacker's project compiler"
   LICENSE                        = "MPL"
   AST                            = NIL
-  ID                             = 3269742768939378572
-  RULES                          = ((BUILD "skel.asd" ((ASDF/OPERATE:MAKE :SKEL/CLI)))..
-  DOCUMENTS                      = ("readme.org")
+  ID                             = 3516221615169645832
+  VC                             = :HG
+  RULES                          = NIL
+  DOCUMENTS                      = NIL
   SCRIPTS                        = NIL
   SNIPPETS                       = NIL
+  STASH                          = NIL
+  SHED                           = NIL
   ABBREVS                        = NIL
 #+end_example
-
+* Examples
+** Default
+** Lisp
+** Rust
+** Combo
+** Nested
 * API
 - CLOS-based core classes
 - EIEIO-based wrapper classes

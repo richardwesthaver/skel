@@ -1,7 +1,9 @@
 ;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
-(skel (:path "~/dev/skel")
-      (:author "Richard Westhaver <ellis@rwest.io>")
-      (:kind :lisp)
-      (:description "A hacker's project compiler")
-      (:license "MPL")
-      (:vc :hg))
+:name skel
+:path "~/dev/skel"
+:version "0.1.0"
+:author "Richard Westhaver <ellis@rwest.io>"
+:kind :lisp
+:description "A hacker's project compiler"
+:license "MPL"
+:vc :hg
