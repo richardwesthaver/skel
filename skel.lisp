@@ -1,8 +1,14 @@
 ;;; skel.lisp --- skeleton library
+
+;; A hacker's project compiler.
+
+;;; Commentary:
+
+;;; Code:
 (eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
 
 (defpackage skel
-  (:use :cl :sxp :cond :fu :fmt :sb-mop)
+  (:use :cl :sxp :cond :fu :fmt :sb-mop :log)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
   (:shadowing-import-from :uiop :pathname-parent-directory-pathname :read-file-forms)
@@ -14,7 +20,7 @@
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-command
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
-   :describe-skeleton :describe-project))
+   :describe-skeleton :describe-project :init-skelfile))
 
 (in-package :skel)
 
@@ -59,24 +65,30 @@
 (defgeneric sk-weave (self))
 (defgeneric sk-call (self))
 (defgeneric sk-print (self))
+(defgeneric sk-load (self &key &allow-other-keys))
+(defgeneric sk-compile (self &key &allow-other-keys))
 (defgeneric rehash-object (self))
-(defgeneric init-skelfile (self &key path &allow-other-keys))
+(defgeneric make-skelfile (self &key path &allow-other-keys))
 (defgeneric sk-transform (self other &key &allow-other-keys))
+;; TODO 2023-09-22: consider a skelfile-writer struct
+(defgeneric make-skelfile (self &key path header timestamp include &allow-other-keys))
+			   
 ;;; Objects
 (defclass skel ()
-  ((id :initarg :id :initform (required-argument :id) :accessor sk-id :type fixnum))
+  ((id :initarg :id :initform (sxhash nil) :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))
 
 (defmethod print-object ((self skel) stream)
   (print-unreadable-object (self stream :type t)
     (format stream "~S ~A" :id (fmt-sxhash (sk-id self)))))
 
-(defmethod initialize-instance ((self skel) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance :before((self skel) &rest initargs &key &allow-other-keys)
   (unless (getf initargs :id)
     ;; TODO 2023-09-10: make fast 
     (with-slots (id) self
-      (sxhash self)))
-  (call-next-method))
+      (setf id (sxhash self)))
+  (when (next-method-p)
+    (call-next-method))))
 
 ;; TODO 2023-09-11: research other hashing strategies - maybe use the
 ;; sxhash as a nonce for UUID
@@ -138,7 +150,8 @@ via the special form stored in the `ast' slot."))
   (:documentation "Skel Version Control systems."))
 
 (defclass sk-project (skel sxp sk-meta)
-  ((vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)
+  ((name :initarg :name :initform "" :type string)
+   (vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)
    (rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
@@ -175,6 +188,26 @@ via the special form stored in the `ast' slot."))
 (defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase))
   (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))
 
+;; ast -> file
+(defmethod make-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t))
+  (with-slots (ast) self
+    (build-ast self :nullp nullp)
+    (prog1 
+	(with-open-file (out path
+			     :direction :output
+			     :if-exists :error
+			     :if-does-not-exist :create)
+	  (when comment (princ
+			 (make-source-header-comment
+			  (sk-name self)
+			  :timestamp t
+			  :description (sk-description self)
+			  :opts '("mode: skel;"))
+			 out))
+	  (write-sxp-stream self out))
+      (setf ast nil))))
+
+;;; File Headers
 (deftype file-header-kind () '(member :source :shebang))
 
 (declaim (inline %make-file-header))
@@ -211,39 +244,7 @@ via the special form stored in the `ast' slot."))
   "Generate a shebang file-header line."
   (format nil "#~A ~{~A~^ ~}~%" shell args))
 
-;; ast -> file
-(defmethod init-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t))
-  (with-slots (ast) self
-    (build-ast self :nullp nullp)
-    (prog1 
-	(with-open-file (out path
-			     :direction :output
-			     :if-exists :error
-			     :if-does-not-exist :create)
-	  (when comment (princ
-			 (make-source-header-comment
-			  (sk-name self)
-			  :timestamp t
-			  :description (sk-description self)
-			  :opts '("mode: skel;"))
-			 out))
-	  (write-sxp-stream self out))
-      (setf ast nil))))
-
-;;; Debug
-(defun describe-skeleton (skel &optional (stream t))
-  "Describe the object SKEL which should inherit from the `skel' superclass."
-  (print-object skel stream)
-  (terpri stream))
-
-(defun describe-project (&optional path (stream t))
-  "Describe the project responsible for the pathname PATH. Defaults to
-`sb-posix:getcwd'."
-  (let* ((cd (or path (getcwd))))
-    (print cd stream)
-    (terpri stream)))
-
-;;; Functions
+;;; Utils
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
   (let ((form (read-file-forms file)))
@@ -278,3 +279,21 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 	(if (eql path next)
 	    (find-project-root next name)
 	    (warn "failed to find project root")))))
+
+(defun init-skelfile (&optional file name)
+  (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
+	(path (or file *default-skelfile*)))
+    (make-skelfile sk :path path)))
+
+;;; Debug
+(defun describe-skeleton (skel &optional (stream t))
+  "Describe the object SKEL which should inherit from the `skel' superclass."
+  (print-object skel stream)
+  (terpri stream))
+
+(defun describe-project (&optional path (stream t))
+  "Describe the project responsible for the pathname PATH. Defaults to
+`sb-posix:getcwd'."
+  (let* ((cd (or path (getcwd))))
+    (print cd stream)
+    (terpri stream)))
