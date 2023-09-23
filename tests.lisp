@@ -30,4 +30,14 @@ make-shebang-comment, and make-shebang-file-header."
 (deftest skelfiles ()
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
-  (init-skelfile (format nil "/tmp/~A.sk" (gensym))))
+  (let ((file (format nil "/tmp/~A.sk" (gensym))))
+    (init-skelfile file)
+    (delete-file file)))
+
+(deftest vm ()
+  "EXPERIMENTAL"
+  (let ((vm (make-sk-vm 200)))
+    (dotimes (i 200)
+      (sks-pop vm))
+    (signals simple-error (sks-pop vm))))
+

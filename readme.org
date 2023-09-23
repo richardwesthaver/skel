@@ -181,6 +181,46 @@ debug:compile;$(LISP) --eval "(start-repl)"
 ** Rust
 ** Combo
 ** Nested
+* Tests
+The unit tests may also be a useful reference:
+
+#+begin_src lisp :results output replace :wrap src lisp :exports both :package :skel.tests
+  (ql:quickload :macs)
+  (ql:quickload :skel)
+  (ql:quickload :skel/tests)
+  (load "tests.lisp")
+  (in-package :skel.tests)
+  (setq *log-level* nil) ;; :debug,t
+  (setq *catch-test-errors* t)
+  (setq *compile-tests* t)
+  (list (multiple-value-list (do-tests :skel)) (reverse (test-results *test-suite*)))
+#+end_src
+
+#+RESULTS:
+#+begin_src lisp
+To load "macs":
+  Load 1 ASDF system:
+    macs
+; Loading "macs"
+
+To load "skel":
+  Load 1 ASDF system:
+    skel
+; Loading "skel"
+
+To load "skel/tests":
+  Load 1 ASDF system:
+    skel/tests
+; Loading "skel/tests"
+
+in suite SKEL with 4/4 tests:
+#<PASS VM-TEST8354> 
+#<PASS SKELFILES-TEST8353> 
+#<PASS HEADER-COMMENTS-TEST8352> 
+#<PASS SANITY-TEST8351> 
+No tests failed.
+#+end_src
+
 * API
 - CLOS-based core classes
 - EIEIO-based wrapper classes
