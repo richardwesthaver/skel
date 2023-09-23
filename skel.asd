@@ -12,7 +12,8 @@
   :components ((:file "skel")
 	       (:file "vc")
 	       (:file "asdf")
-	       (:file "make")))
+	       (:file "make")
+	       (:file "virt")))
 
 (defsystem "skel/cli"
   :depends-on (:skel :macs)

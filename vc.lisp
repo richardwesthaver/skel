@@ -49,6 +49,8 @@
 
 (defclass repo (skel sk-meta)
   ((head)
+   ;; TODO 2023-09-23: consider a separate module 'ignore.lisp' - be
+   ;; aware of .containerignore
    (ignore)
    (branches)
    (tags)
