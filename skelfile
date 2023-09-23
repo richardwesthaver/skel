@@ -9,10 +9,10 @@
 	:mirror (git "https://github.com/richardwesthaver/skel"))
 :rules 
 ((compile () (compile-system :skel))
- (test ("tests.lisp" compile load) (quickload :skel/tests) (compile-file $<) (load-file $<) (do-tests :skel))
+ (test ("tests.lisp" compile) (quickload :skel/tests) (compile-file $<) (load-file $<) (do-tests :skel))
  ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
  (clean () (rm -rf *.fasl))
- (debug (compile load) (run-sbcl)))
+ (debug (compile) (run-sbcl)))
 ;; TODO 2023-09-22: build-wd 
 :scripts 
 ((yolo () "a yolo commit" 

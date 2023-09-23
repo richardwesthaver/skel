@@ -31,7 +31,7 @@
  (type sk-project *skel-project*)
  (type string *default-skel-user* *default-skelfile* *skelfile-extension*)
  (type pathname *default-skel-cache* *default-user-skel-config* *default-global-skel-config*)
- (type vc-designator *default-skel-vc*))
+ (type vc-designator *default-skel-vc-kind*))
 
 (defvar *skel-project*)
 
@@ -49,7 +49,7 @@
 (defparameter *default-user-skel-config* (make-pathname :name (format nil "home/~a/.skelrc" *default-skel-user*)))
 (defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
 
-(defparameter *default-skel-vc* :hg)
+(defparameter *default-skel-vc-kind* :hg)
 
 ;;; Conditions
 (define-condition skel-syntax-error (sxp-syntax-error) ())
@@ -130,28 +130,29 @@
   (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
 via the special form stored in the `ast' slot."))
 
-(defclass sk-document (skel)
+(defclass sk-document (skel sk-meta sxp)
   ())
 
-(defclass sk-script (skel)
+(defclass sk-script (skel sk-meta sxp)
   ())
 
-(defclass sk-config (skel)
+(defclass sk-config (skel sk-meta sxp)
   ())
 
-(defclass sk-snippet (skel)
-  ())
+(defstruct sk-snippet ""
+  (name "" :type string) 
+  (form "" :type form))
 
-(defclass sk-abbrev (skel)
-  ())
+(defstruct sk-abbrev ""
+  (match nil :type form) 
+  (expansion nil :type form))
 
-(defclass sk-vc-meta (sk-meta)
-  ()
-  (:documentation "Skel Version Control systems."))
-
+(defstruct sk-vc-meta ""
+	   (kind *default-skel-vc-kind* :type vc-designator)
+  remotes)
 (defclass sk-project (skel sxp sk-meta)
   ((name :initarg :name :initform "" :type string)
-   (vc :initarg :vc :initform *default-skel-vc* :accessor sk-vc)
+   (vc :initarg :vc :initform (make-sk-vc-meta :kind *default-skel-vc-kind*) :type sk-vc-meta :accessor sk-vc)
    (rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
