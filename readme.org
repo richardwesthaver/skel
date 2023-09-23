@@ -85,26 +85,35 @@ cat skelfile
 	:mirror (git "https://github.com/richardwesthaver/skel"))
 :rules 
 ((compile () (compile-system :skel))
- (load () (quickload :skel))
- (test ("tests.lisp" compile load) (compile-file $<) (load-file $<) (do-tests :skel))
+ (test ("tests.lisp" compile load) (quickload :skel/tests) (compile-file $<) (load-file $<) (do-tests :skel))
  ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
  (clean () (rm -rf *.fasl))
  (debug (compile load) (run-sbcl)))
-:scripts ((yolo () (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe)))
+;; TODO 2023-09-22: build-wd 
+:scripts 
+((yolo () "a yolo commit" 
+       (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe))
+ (sxpp (file &optional kind) "Return T if FILE is a valid sxp of type KIND"
+       (sxpp kind (read-sxp-file file))))
 :snippets nil
 :documents ("readme.org")
-:stash nil
-:shed nil
+:stash (:local ".stash" :remote (:hg "https://lab.rwest.io/packy/stash"))
+:shed (:local ".shed" :remote (:hg "https://lab.rwest.io/packy/shed"))
 :abbrevs 
 ((isk init-skelfile)
  (dsk describe-skeleton)
  (fsk find-skelfile)
  (lsk load-skelfile)
  (csk compile-skelfile))
+:ast (anything you put in here is ignored)
 #+end_src
 
 This is just a form without the top-level parentheses - you're free to
 omit them in a skelfile.
+
+** describe
+The =describe= command can be used to check the currently active
+skelfile, printing any errors and the parsed object.
 
 #+begin_src shell :results output replace :exports both
   ./skel describe
@@ -126,14 +135,46 @@ Slots with :INSTANCE allocation:
   AST                            = NIL
   ID                             = 440866058550518548
   VC                             = (HG :DEFAULT "https://lab.rwest.io/ellis/skel" :MIRROR..
-  RULES                          = ((COMPILE NIL (COMPILE-SYSTEM :SKEL)) (LOAD NIL (QUICKLOAD :SKEL))..
+  RULES                          = ((COMPILE NIL (COMPILE-SYSTEM :SKEL))..
   DOCUMENTS                      = ("readme.org")
-  SCRIPTS                        = ((YOLO NIL (HG-AR ./&) (HG-CI -M YOLO) (HG-PUSH) (HG-FE)))
+  SCRIPTS                        = ((YOLO NIL "a yolo commit" (HG-AR ./&) (HG-CI -M YOLO) (HG-PUSH)..
   SNIPPETS                       = NIL
-  STASH                          = NIL
-  SHED                           = NIL
+  STASH                          = (:LOCAL ".stash" :REMOTE (:HG "https://lab.rwest.io/packy/stash"))
+  SHED                           = (:LOCAL ".shed" :REMOTE (:HG "https://lab.rwest.io/packy/shed"))
   ABBREVS                        = ((ISK INIT-SKELFILE) (DSK DESCRIBE-SKELETON) (FSK FIND-SKELFILE)..
 #+end_example
+** TODO compile
+Skelfiles can be compiled to produce a new project skeleton or update
+an existing one.
+
+Try compiling skel's skelfile:
+
+#+begin_src shell :results output replace :exports code
+./skel compile
+#+end_src
+
+You may also compile individual components of the project structure,
+for example, to compile the rules into a makefile:
+
+#+begin_src shell :results output replace :exports code
+./skel compile --rules
+#+end_src
+
+#+begin_src shell :results output :wrap src makefile :exports both
+cat makefile
+#+end_src
+
+#+RESULTS:
+#+begin_src makefile
+### SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode:makefile ; -*-
+LISP=sbcl --noinform --non-interactive --eval "(asdf:load-asd \"skel.asd\")" --eval "(ql:quickload :skel)"
+.PHONY: compile load clean
+compile:;$(LISP) --eval "(asdf:compile-system :skel)"
+test:compile;$(LISP) --eval "(ql:quickload :skel/tests)" --eval "(in-package :skel.tests)" --eval "(compile-file \"tests.lisp\")" --eval "(load-file \"tests.lisp\")" --eval "(do-tests :skel)"
+clean:;rm -rf *.fasl
+debug:compile;$(LISP) --eval "(start-repl)"
+#+end_src
+
 * Examples
 ** Default
 ** Lisp

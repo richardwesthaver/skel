@@ -9,19 +9,24 @@
 	:mirror (git "https://github.com/richardwesthaver/skel"))
 :rules 
 ((compile () (compile-system :skel))
- (load () (quickload :skel))
- (test ("tests.lisp" compile load) (compile-file $<) (load-file $<) (do-tests :skel))
+ (test ("tests.lisp" compile load) (quickload :skel/tests) (compile-file $<) (load-file $<) (do-tests :skel))
  ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
  (clean () (rm -rf *.fasl))
  (debug (compile load) (run-sbcl)))
-:scripts ((yolo () (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe)))
+;; TODO 2023-09-22: build-wd 
+:scripts 
+((yolo () "a yolo commit" 
+       (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe))
+ (sxpp (file &optional kind) "Return T if FILE is a valid sxp of type KIND"
+       (sxpp kind (read-sxp-file file))))
 :snippets nil
 :documents ("readme.org")
-:stash nil
-:shed nil
+:stash (:local ".stash" :remote (:hg "https://lab.rwest.io/packy/stash"))
+:shed (:local ".shed" :remote (:hg "https://lab.rwest.io/packy/shed"))
 :abbrevs 
 ((isk init-skelfile)
  (dsk describe-skeleton)
  (fsk find-skelfile)
  (lsk load-skelfile)
  (csk compile-skelfile))
+:ast (anything you put in here is ignored)
