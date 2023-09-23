@@ -1,9 +1,27 @@
 ;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
 :name skel
-:path "~/dev/skel"
 :version "0.1.0"
 :author "Richard Westhaver <ellis@rwest.io>"
 :kind :lisp
 :description "A hacker's project compiler"
 :license "MPL"
-:vc :hg
+:vc (hg :default "https://lab.rwest.io/ellis/skel"
+	:mirror (git "https://github.com/richardwesthaver/skel"))
+:rules 
+((compile () (compile-system :skel))
+ (load () (quickload :skel))
+ (test ("tests.lisp" compile load) (compile-file $<) (load-file $<) (do-tests :skel))
+ ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
+ (clean () (rm -rf *.fasl))
+ (debug (compile load) (run-sbcl)))
+:scripts ((yolo () (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe)))
+:snippets nil
+:documents ("readme.org")
+:stash nil
+:shed nil
+:abbrevs 
+((isk init-skelfile)
+ (dsk describe-skeleton)
+ (fsk find-skelfile)
+ (lsk load-skelfile)
+ (csk compile-skelfile))

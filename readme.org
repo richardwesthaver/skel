@@ -76,13 +76,31 @@ cat skelfile
 #+begin_src skel
 ;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
 :name skel
-:path "~/dev/skel"
 :version "0.1.0"
 :author "Richard Westhaver <ellis@rwest.io>"
 :kind :lisp
 :description "A hacker's project compiler"
 :license "MPL"
-:vc :hg
+:vc (hg :default "https://lab.rwest.io/ellis/skel"
+	:mirror (git "https://github.com/richardwesthaver/skel"))
+:rules 
+((compile () (compile-system :skel))
+ (load () (quickload :skel))
+ (test ("tests.lisp" compile load) (compile-file $<) (load-file $<) (do-tests :skel))
+ ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
+ (clean () (rm -rf *.fasl))
+ (debug (compile load) (run-sbcl)))
+:scripts ((yolo () (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe)))
+:snippets nil
+:documents ("readme.org")
+:stash nil
+:shed nil
+:abbrevs 
+((isk init-skelfile)
+ (dsk describe-skeleton)
+ (fsk find-skelfile)
+ (lsk load-skelfile)
+ (csk compile-skelfile))
 #+end_src
 
 This is just a form without the top-level parentheses - you're free to
@@ -94,27 +112,27 @@ omit them in a skelfile.
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 30cc-20ed-e3bc-ad08>
+#<SKEL:SK-PROJECT :ID 061e-4558-2d6e-2314>
   [standard-object]
 
 Slots with :INSTANCE allocation:
   NAME                           = SKEL
-  PATH                           = "~/dev/skel"
+  PATH                           = "/home/ellis/dev/skel"
   AUTHOR                         = "Richard Westhaver <ellis@rwest.io>"
   VERSION                        = "0.1.0"
   KIND                           = :LISP
   DESCRIPTION                    = "A hacker's project compiler"
   LICENSE                        = "MPL"
   AST                            = NIL
-  ID                             = 3516221615169645832
-  VC                             = :HG
-  RULES                          = NIL
-  DOCUMENTS                      = NIL
-  SCRIPTS                        = NIL
+  ID                             = 440866058550518548
+  VC                             = (HG :DEFAULT "https://lab.rwest.io/ellis/skel" :MIRROR..
+  RULES                          = ((COMPILE NIL (COMPILE-SYSTEM :SKEL)) (LOAD NIL (QUICKLOAD :SKEL))..
+  DOCUMENTS                      = ("readme.org")
+  SCRIPTS                        = ((YOLO NIL (HG-AR ./&) (HG-CI -M YOLO) (HG-PUSH) (HG-FE)))
   SNIPPETS                       = NIL
   STASH                          = NIL
   SHED                           = NIL
-  ABBREVS                        = NIL
+  ABBREVS                        = ((ISK INIT-SKELFILE) (DSK DESCRIBE-SKELETON) (FSK FIND-SKELFILE)..
 #+end_example
 * Examples
 ** Default
