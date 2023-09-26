@@ -2,24 +2,19 @@
 (defpackage :skel.tests
   (:use :cl :skel :skel.make :skel.asdf :skel.vc :rt)
   (:import-from :uiop :file-exists-p))
+
 (in-package :skel.tests)
 
 (defsuite :skel)
 (in-suite :skel)
 
-(defun gen-tmp-path (ext)
-  (format nil "/tmp/~A.~A" (gensym) ext))
-
-(defvar *tmp-path* "./")
 (defvar %tmp)
+(defun gen-tmp-path (ext)
+  (setq %tmp (format nil "/tmp/~A.~A" (gensym) ext)))
 
-;; doesn't really need to be a macro but w/e
-(defmacro with-tmp-file (ext &body body)
-  `(progn
-     (setq %tmp (format nil "~A~A.~A" *tmp-path* (gensym) ,ext))
-     ,@body
-     (is (file-exists-p %tmp))
-     (ignore-errors (delete-file %tmp))))
+(defun with-tmp-file (file &rest body)
+  (prog1 body
+    (when (file-exists-p file) (delete-file file))))
 
 (defun skels (c)
   (let ((s))
@@ -50,16 +45,17 @@ make-shebang-comment, and make-shebang-file-header."
 (deftest skelfile ()
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
-  (with-tmp-file "sk"
-    (is (init-skelfile %tmp)))
-  (with-tmp-file "sk"
-    (is (sk-make-file (make-instance 'sk-project :name "nada") :path %tmp))))
+  (with-tmp-file (gen-tmp-path "sk")
+    (is (sk-write-file (make-instance 'sk-project :name "nada" :path %tmp) :if-exists :overwrite))
+    (setq %tmp (gen-tmp-path "sk"))
+    (is (init-skelfile %tmp))
+    (is (print (sk-read-file (make-instance 'sk-project) :path %tmp)))))
 
 (deftest makefile ()
   "Make sure makefiles are making out ok."
-  (with-tmp-file "mk"
-    (let ((mk (make-instance 'makefile :name "foobar")))
-      (sk-make-file mk :path %tmp))))
+    (with-tmp-file (gen-tmp-path "mk")
+      (let ((mk (make-instance 'makefile :name "foobar" :path %tmp)))
+	(is (null (sk-write-file mk :if-exists :overwrite))))))
 
 (deftest vm ()
   "EXPERIMENTAL"

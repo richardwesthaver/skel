@@ -64,10 +64,10 @@
       (loop for imp across implicit
 	    do (format s "~A:~A;~A~%" imp nil t)))))
 
-(defmethod sk-make-file ((self makefile) &key (path *default-makefile*) (comment t))
+(defmethod sk-write-file ((self makefile) &key (path *default-makefile*) (comment t) (if-exists :overwrite))
   (with-open-file (out path
 		       :direction :output
-		       :if-exists :error
+		       :if-exists if-exists
 		       :if-does-not-exist :create)
     (when comment (princ
 		   (make-source-header-comment

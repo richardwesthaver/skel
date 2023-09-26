@@ -22,7 +22,7 @@
    :sk-compile
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :init-skelfile
-   :sk-make-file
+   :sk-write-file :sk-read-file
    :make-stack-slot :make-sk-vm :sks-ref :sks-pop :sks-push))
 
 (in-package :skel)
@@ -72,7 +72,8 @@
 (defgeneric rehash-object (self))
 (defgeneric sk-transform (self other &key &allow-other-keys))
 ;; TODO 2023-09-22: consider a skelfile-writer struct
-(defgeneric sk-make-file (self &key path &allow-other-keys))
+(defgeneric sk-read-file (self &key path &allow-other-keys))
+(defgeneric sk-write-file (self &key path &allow-other-keys))
 			   
 ;;; Objects
 (defclass skel ()
@@ -250,14 +251,22 @@ via the special form stored in the `ast' slot."))
 		    (format stream "~%"))
 	 (error 'sxp-fmt-error)))
     (t (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))))
-     
+
+;; file -> ast
+;; allow-comment?
+(defmethod sk-read-file ((self sk-project) &key (path *default-skelfile*))
+  (wrap self (read-sxp-file path)))
+
 ;; ast -> file
-(defmethod sk-make-file ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical))
+(defmethod sk-write-file ((self sk-project) 
+			  &key 
+			    (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical)
+			    (if-exists :error))
     (build-ast self :nullp nullp)
   (prog1 
       (with-open-file (out path
 			   :direction :output
-			   :if-exists :error
+			   :if-exists if-exists
 			   :if-does-not-exist :create)
 	(when comment (princ
 		       (make-source-header-comment
@@ -347,7 +356,7 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 (defun init-skelfile (&optional file name fmt)
   (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
 	(path (or file *default-skelfile*)))
-    (sk-make-file sk :path path :fmt fmt)))
+    (sk-write-file sk :path path :fmt fmt)))
 
 ;;; Debug
 (defun describe-skeleton (skel &optional (stream t))
