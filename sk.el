@@ -1,4 +1,6 @@
-;;; skel.el --- skel Emacs API -*- lexical-binding: t; -*-
+;;; sk.el --- skel Emacs Mode -*- lexical-binding: t; -*-
+
+;; skel-mode and friends
 
 ;; Copyright (C) 2023  anticorp
 

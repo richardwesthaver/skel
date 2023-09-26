@@ -177,6 +177,59 @@ debug:compile;$(LISP) --eval "(start-repl)"
 
 * Examples
 ** Default
+When you run =skel init= this is the basic skelfile that will be
+generated in the current directory, depending on the following
+contexts:
+
+- cli args
+- user config
+- directory contents
+
+
+With no cli args or user config and an empty directory the output
+looks like this:
+
+#+begin_src skel
+  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
+  ((:name "examples")
+   (:path "/home/ellis/dev/skel/examples"))
+#+end_src
+
+This is the /canonical/ format of a skel form and is the exact
+representation used internally.
+
+You may prefer a less verbose representation for readability and
+hacking. To enable /collapsed/ format, add the following to your
+=.skelrc= file:
+
+#+begin_src skel
+:default-formatter collapsed
+#+end_src
+
+Now when you run =skel init= your =skelfile= will look like this:
+#+begin_src skel
+  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
+  :name "examples"
+  :path "/home/ellis/dev/skel/examples"
+#+end_src
+
+/Whoosh/. no more parens. Well, until you need them rather. The
+collapsed format recursively removes outer parens as long as each
+top-level element is itself a list.
+
+To override your user-config, you can specify cli args like so:
+
+#+begin_src shell
+skel init --vc hg --fmt canonical
+#+end_src
+
+#+begin_src skel
+  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
+  ((:name "examples")
+   (:path "/home/ellis/dev/skel/examples")
+   (:vc ((:kind :hg))))
+#+end_src
+
 ** Lisp
 ** Rust
 ** Combo
@@ -185,39 +238,49 @@ debug:compile;$(LISP) --eval "(start-repl)"
 The unit tests may also be a useful reference:
 
 #+begin_src lisp :results output replace :wrap src lisp :exports both :package :skel.tests
-  (ql:quickload :macs)
-  (ql:quickload :skel)
-  (ql:quickload :skel/tests)
+  ;; (ql:quickload :macs)
+  ;; (ql:quickload :skel)
+  ;; (ql:quickload :skel/tests)
   (load "tests.lisp")
   (in-package :skel.tests)
-  (setq *log-level* nil) ;; :debug,t
-  (setq *catch-test-errors* t)
+  (setq log:*log-level* :debug)
+  ;; (setq *catch-test-errors* nil)
   (setq *compile-tests* t)
-  (list (multiple-value-list (do-tests :skel)) (reverse (test-results *test-suite*)))
+  (list (multiple-value-list (do-tests :skel)) (test-results *test-suite*))
 #+end_src
 
 #+RESULTS:
 #+begin_src lisp
-To load "macs":
-  Load 1 ASDF system:
-    macs
-; Loading "macs"
-
-To load "skel":
-  Load 1 ASDF system:
-    skel
-; Loading "skel"
-
-To load "skel/tests":
-  Load 1 ASDF system:
-    skel/tests
-; Loading "skel/tests"
-
 in suite SKEL with 4/4 tests:
-#<PASS VM-TEST8354> 
-#<PASS SKELFILES-TEST8353> 
-#<PASS HEADER-COMMENTS-TEST8352> 
-#<PASS SANITY-TEST8351> 
+:DEBUG @ 70168.84 :: running test:  #<TEST VM :fn VM-test12307 :args NIL :persist NIL {1004E25983}> 
+:DEBUG @ 70168.84 :: #<PASS (LET ((VM (MAKE-SK-VM 201)))
+                              (DOTIMES (I 200) (SKS-POP VM))
+                              T)> 
+:DEBUG @ 70168.84 :: #<PASS (SKS-POP VM)> 
+#<PASS VM-TEST12307> 
+:DEBUG @ 70168.84 :: running test:  #<TEST SKELFILES :fn SKELFILES-test12306 :args NIL :persist NIL {1004E23E83}> 
+:DEBUG @ 70168.85 :: #<PASS (INIT-SKELFILE FILE)> 
+:DEBUG @ 70168.85 :: #<PASS (DELETE-FILE FILE)> 
+#<PASS SKELFILES-TEST12306> 
+:DEBUG @ 70168.85 :: running test:  #<TEST HEADER-COMMENTS :fn HEADER-COMMENTS-test12305 :args NIL :persist NIL {1004E22693}> 
+:DEBUG @ 70168.85 :: #<PASS (EQ
+                             (TYPE-OF
+                              (MAKE-SHEBANG-FILE-HEADER
+                               (MAKE-SHEBANG-COMMENT /dev/null)))
+                             'FILE-HEADER)> 
+:DEBUG @ 70168.85 :: #<PASS (EQ
+                             (TYPE-OF
+                              (MAKE-SOURCE-FILE-HEADER
+                               (MAKE-SOURCE-HEADER-COMMENT foo-test TIMESTAMP T
+                                                           DESCRIPTION
+                                                           nothing to see here
+                                                           OPTS
+                                                           '(Definitely-Not_Emacs: T;))))
+                             'FILE-HEADER)> 
+#<PASS HEADER-COMMENTS-TEST12305> 
+:DEBUG @ 70168.85 :: running test:  #<TEST SANITY :fn SANITY-test12304 :args NIL :persist NIL {1004E20B93}> 
+:DEBUG @ 70168.87 :: #<PASS (EQ T (APPLY #'/= (SKELS 1000)))> 
+#<PASS SANITY-TEST12304> 
 No tests failed.
 #+end_src
 

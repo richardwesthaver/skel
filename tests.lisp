@@ -21,23 +21,31 @@
 
 This covers variations of make-source-header-comment, make-source-file-header,
 make-shebang-comment, and make-shebang-file-header."
-  (make-shebang-file-header (make-shebang-comment "/dev/null"))
-  (make-source-file-header (make-source-header-comment "foo-test"
-						       :timestamp t
-						       :description "nothing to see here"
-						       :opts '("Definitely-Not_Emacs: T;"))))
+  (is (eq (type-of (make-shebang-file-header 
+		    (make-shebang-comment "/dev/null"))) 
+	  'skel::file-header))
+  (is (eq (type-of (make-source-file-header 
+		    (make-source-header-comment 
+		     "foo-test"
+		     :timestamp t
+		     :description "nothing to see here"
+		     :opts '("Definitely-Not_Emacs: T;"))))
+	  'skel::file-header)))
 
 (deftest skelfiles ()
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
   (let ((file (format nil "/tmp/~A.sk" (gensym))))
-    (init-skelfile file)
-    (delete-file file)))
+    (is (init-skelfile file))
+    (is (delete-file file))))
 
 (deftest vm ()
   "EXPERIMENTAL"
-  (let ((vm (make-sk-vm 200)))
-    (dotimes (i 200)
-      (sks-pop vm))
+  (is (let ((vm (make-sk-vm 201)))
+	(dotimes (i 200)
+	  (sks-pop vm))
+	t))
+  (let ((vm (make-sk-vm 1)))
+    (is (sks-pop vm))
     (signals simple-error (sks-pop vm))))
 
