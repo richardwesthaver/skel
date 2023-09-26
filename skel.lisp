@@ -60,7 +60,6 @@
 
 ;;; Proto
 (defgeneric sk-run (self))
-(defgeneric sk-init (self))
 (defgeneric sk-new (self))
 (defgeneric sk-save (self))
 (defgeneric sk-tangle (self))
@@ -70,7 +69,6 @@
 (defgeneric sk-load (self &key &allow-other-keys))
 (defgeneric sk-compile (self &key &allow-other-keys))
 (defgeneric rehash-object (self))
-(defgeneric make-skelfile (self &key path &allow-other-keys))
 (defgeneric sk-transform (self other &key &allow-other-keys))
 ;; TODO 2023-09-22: consider a skelfile-writer struct
 (defgeneric make-skelfile (self &key path header timestamp include &allow-other-keys))
@@ -84,7 +82,7 @@
   (print-unreadable-object (self stream :type t)
     (format stream "~S ~A" :id (fmt-sxhash (sk-id self)))))
 
-(defmethod initialize-instance :before((self skel) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance :before ((self skel) &rest initargs &key &allow-other-keys)
   (unless (getf initargs :id)
     ;; TODO 2023-09-10: make fast 
     (with-slots (id) self
@@ -108,10 +106,20 @@
    (license :initarg :license :type :string :accessor sk-license))
   (:documentation "Skel Meta class."))
  
-(defmethod initialize-instance ((self sk-meta) &rest initargs &key &allow-other-keys)
-  (unless (getf initargs :path)
-    (setf (sk-path self) (getcwd)))
-  (call-next-method))
+(defun sk-init (class &rest initargs)
+  (apply #'make-instance class initargs))
+
+(defmacro sk-init-dir (class &rest initargs)
+  `(let ((self (sk-init ',class ,@initargs)))
+     (unless (getf ',initargs :path)
+       (setf (sk-path self) (getcwd)))
+     self))
+
+(defmacro sk-init-file (class &rest initargs)
+  `(let ((self (sk-init ',class ,@initargs)))
+     (unless (getf ',initargs :path)
+       (setf (sk-path self) *default-skelfile*))
+     self))
 
 (defclass sk-command (skel)
   ())
@@ -123,14 +131,19 @@
   ())
 
 (defclass sk-recipe (skel)
-  ((commands :initarg :commands :initform nil :type (or list (vector sk-command)) :accessor sk-commands)))
+  ((body :initarg :commands :initform nil :type list :accessor sk-body)))
 
 (defclass sk-rule (skel)
-  ((target :initarg :target :initform nil :type (or null sk-target))
-   (source :initarg :source :initform nil :type (or null sk-source))
-   (recipe :initarg :recipe :initform nil :type (or null sk-recipe)))
+  ((target :initarg :target :type sk-target)
+   (source :initarg :source :type sk-source)
+   (recipe :initarg :recipe :type sk-recipe))
   (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
 via the special form stored in the `ast' slot."))
+
+(defmacro sk-make-rule (target source &body recipe)
+  "Make a new SK-RULE."
+  `(let ((r (make-instance 'sk-recipe :body ',recipe)))
+     (make-instance 'sk-rule :target ,target :source ,source :recipe r)))
 
 (defclass sk-document (skel sk-meta sxp)
   ())
@@ -138,8 +151,20 @@ via the special form stored in the `ast' slot."))
 (defclass sk-script (skel sk-meta sxp)
   ())
 
-(defclass sk-config (skel sk-meta sxp)
-  ())
+(defclass sk-config (skel sk-meta sxp) ())
+
+(defclass sk-user-config (sk-config)
+  ((default-fmt :type symbol)
+   ;; TODO 2023-09-26: can change type to vc-meta, use as a base
+   ;; template for stuff like pre-defined remote URLs.
+   (default-vc :type vc-designator)
+   (default-shed :type string)
+   (default-stash :type string)
+   (default-license :type string)
+   (default-log-level :type log-level-designator)
+   (user :type form)
+   (auto-insert :type form)
+   (custom :type form)))
 
 (defstruct sk-snippet ""
   (name "" :type string) 
@@ -151,7 +176,7 @@ via the special form stored in the `ast' slot."))
 
 (defstruct sk-vc-meta ""
 	   (kind *default-skel-vc-kind* :type vc-designator)
-  remotes)
+	   (remotes))
 (defclass sk-project (skel sxp sk-meta)
   ((name :initarg :name :initform "" :type string)
    (vc :initarg :vc :initform (make-sk-vc-meta :kind *default-skel-vc-kind*) :type sk-vc-meta :accessor sk-vc)

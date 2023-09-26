@@ -38,8 +38,8 @@
 
 (defmethod push-rule ((self makefile) (rule sk-rule) &optional implicit)
   (if implicit
-      (vector-push rule (mk-erules self))
-      (vector-push rule (mk-irules self))))
+      (vector-push rule (mk-irules self))
+      (vector-push rule (mk-erules self))))
 
 (defmethod push-directive ((self makefile) directive)
   (vector-push directive (mk-directives self)))

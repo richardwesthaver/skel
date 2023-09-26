@@ -203,7 +203,7 @@ hacking. To enable /collapsed/ format, add the following to your
 =.skelrc= file:
 
 #+begin_src skel
-:default-formatter collapsed
+:default-fmt collapsed
 #+end_src
 
 Now when you run =skel init= your =skelfile= will look like this:
