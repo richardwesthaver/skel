@@ -19,9 +19,10 @@
    :make-source-header-comment :make-shebang-comment :*skelfile-boundary* :find-skelfile :load-skelfile
    :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
    :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-command
+   :sk-compile
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :init-skelfile
-
+   :sk-make-file
    :make-stack-slot :make-sk-vm :sks-ref :sks-pop :sks-push))
 
 (in-package :skel)
@@ -67,11 +68,11 @@
 (defgeneric sk-call (self))
 (defgeneric sk-print (self))
 (defgeneric sk-load (self &key &allow-other-keys))
-(defgeneric sk-compile (self &key &allow-other-keys))
+(defgeneric sk-compile (self stream &key &allow-other-keys))
 (defgeneric rehash-object (self))
 (defgeneric sk-transform (self other &key &allow-other-keys))
 ;; TODO 2023-09-22: consider a skelfile-writer struct
-(defgeneric make-skelfile (self &key path header timestamp include &allow-other-keys))
+(defgeneric sk-make-file (self &key path &allow-other-keys))
 			   
 ;;; Objects
 (defclass skel ()
@@ -179,6 +180,7 @@ via the special form stored in the `ast' slot."))
 	   (path nil :type (or symbol string)))
 
 (defmethod write-sxp-stream ((self sk-vc-remote-meta) stream &key (pretty t) (case :downcase) (fmt :collapsed))
+  (declare (ignore fmt))
   (write `(,(sk-vc-remote-meta-name self) ,(sk-vc-remote-meta-path self)) :stream stream :pretty pretty :case case :readably t :array t :escape t))
 
 (defstruct sk-vc-meta ""
@@ -250,23 +252,23 @@ via the special form stored in the `ast' slot."))
     (t (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))))
      
 ;; ast -> file
-(defmethod make-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical))
-  (with-slots (ast) self
+(defmethod sk-make-file ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical))
     (build-ast self :nullp nullp)
-    (prog1 
-	(with-open-file (out path
-			     :direction :output
-			     :if-exists :error
-			     :if-does-not-exist :create)
-	  (when comment (princ
-			 (make-source-header-comment
-			  (sk-name self)
-			  :timestamp t
-			  :description (sk-description self)
-			  :opts '("mode: skel;"))
-			 out))
-	  (write-sxp-stream self out :fmt fmt))
-      (setf ast nil))))
+  (prog1 
+      (with-open-file (out path
+			   :direction :output
+			   :if-exists :error
+			   :if-does-not-exist :create)
+	(when comment (princ
+		       (make-source-header-comment
+			(sk-name self)
+			:cchar #\;
+			:timestamp t
+			:description (sk-description self)
+			:opts '("mode: skel;"))
+		       out))
+	(write-sxp-stream self out :fmt fmt))
+    (setf (ast self) nil)))
 
 ;;; File Headers
 (deftype file-header-kind () '(member :source :shebang))
@@ -287,9 +289,10 @@ via the special form stored in the `ast' slot."))
   (make-file-header :shebang str))
 
 ;; TODO 2023-09-17: this should be a struct I think - file-header maybe?
-(defun make-source-header-comment (name &key (timestamp nil) (description nil) (opts nil))
+(defun make-source-header-comment (name &key (cchar #\;) (timestamp nil) (description nil) (opts nil))
   "Generate a generic file-header with optional timestamp, description, and opts."
-  (format nil ";;; ~A~A~A~A~%" name
+  (format nil "~A ~A~A~A~A~%" (make-string 3 :initial-element cchar) 
+	  name
 	  (if timestamp
 	      (multiple-value-bind (s m h d mo y) (decode-universal-time (get-universal-time) 0)
 		(format nil " @ ~4,'0d-~2,'0d-~2,'0d.~2,'0d:~2,'0d:~2,'0d" y mo d h m s))
@@ -344,7 +347,7 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 (defun init-skelfile (&optional file name fmt)
   (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
 	(path (or file *default-skelfile*)))
-    (make-skelfile sk :path path :fmt fmt)))
+    (sk-make-file sk :path path :fmt fmt)))
 
 ;;; Debug
 (defun describe-skeleton (skel &optional (stream t))

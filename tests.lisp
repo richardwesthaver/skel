@@ -1,10 +1,25 @@
 ;;; tests.lisp --- skel tests
 (defpackage :skel.tests
-  (:use :cl :skel :rt))
+  (:use :cl :skel :skel.make :skel.asdf :skel.vc :rt)
+  (:import-from :uiop :file-exists-p))
 (in-package :skel.tests)
 
 (defsuite :skel)
 (in-suite :skel)
+
+(defun gen-tmp-path (ext)
+  (format nil "/tmp/~A.~A" (gensym) ext))
+
+(defvar *tmp-path* "./")
+(defvar %tmp)
+
+;; doesn't really need to be a macro but w/e
+(defmacro with-tmp-file (ext &body body)
+  `(progn
+     (setq %tmp (format nil "~A~A.~A" *tmp-path* (gensym) ,ext))
+     ,@body
+     (is (file-exists-p %tmp))
+     (ignore-errors (delete-file %tmp))))
 
 (defun skels (c)
   (let ((s))
@@ -32,12 +47,19 @@ make-shebang-comment, and make-shebang-file-header."
 		     :opts '("Definitely-Not_Emacs: T;"))))
 	  'skel::file-header)))
 
-(deftest skelfiles ()
+(deftest skelfile ()
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
-  (let ((file (format nil "/tmp/~A.sk" (gensym))))
-    (is (init-skelfile file))
-    (is (delete-file file))))
+  (with-tmp-file "sk"
+    (is (init-skelfile %tmp)))
+  (with-tmp-file "sk"
+    (is (sk-make-file (make-instance 'sk-project :name "nada") :path %tmp))))
+
+(deftest makefile ()
+  "Make sure makefiles are making out ok."
+  (with-tmp-file "mk"
+    (let ((mk (make-instance 'makefile :name "foobar")))
+      (sk-make-file mk :path %tmp))))
 
 (deftest vm ()
   "EXPERIMENTAL"

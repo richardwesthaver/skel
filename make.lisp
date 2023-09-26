@@ -20,7 +20,7 @@
 
 ;;; Code:
 (defpackage :skel.make
-  (:use :cl :skel)
+  (:use :cl :skel :fmt)
   (:export :makefile))
 
 (in-package :skel.make)
@@ -29,11 +29,11 @@
 (defparameter *makefile-extension* "mk")
 
 ;; https://www.gnu.org/software/make/manual/html_node/Makefile-Contents.html
-(defclass makefile (sk-meta)
-  ((explicit :type (vector sk-rules) :accessor mk-erules)
-   (implicit :type (vector sk-rules) :accessor mk-irules)
-   (variables :type (hash-table) :accessor mk-vars)
-   (directives :type (vector sk-command) :accessor mk-directives))
+(defclass makefile (skel sk-meta)
+  ((directives :initform #() :type (vector sk-command) :accessor mk-directives)
+   (variables :initform (make-hash-table) :type (hash-table) :accessor mk-vars)
+   (explicit :initform #() :type (vector sk-rule) :accessor mk-erules)
+   (implicit :initform #() :type (vector sk-rule) :accessor mk-irules))
   (:documentation "A virtual GNU Makefile."))
 
 (defmethod push-rule ((self makefile) (rule sk-rule) &optional implicit)
@@ -47,3 +47,34 @@
 (defmethod push-var ((self makefile) var)
   (destructuring-bind (k v) var
     (setf (gethash k (mk-directives self)) v)))
+
+(defmethod sk-compile ((self makefile) stream &key &allow-other-keys)
+  "Compile the makefile SELF to output STREAM."
+  (with-open-stream (s stream)
+    (with-slots (directives variables explicit implicit) self
+      ;; directives
+      (loop for d across directives
+	    do (format s "~A~%" d))
+      ;; variables
+      (maphash (lambda (x y) (format s "~A=~A~%" x y)) variables)
+      ;; explicit rules
+      (loop for exp across explicit
+	    do (format s "~A:~A;~A~%" exp nil t))
+      ;; TODO implicit rules
+      (loop for imp across implicit
+	    do (format s "~A:~A;~A~%" imp nil t)))))
+
+(defmethod sk-make-file ((self makefile) &key (path *default-makefile*) (comment t))
+  (with-open-file (out path
+		       :direction :output
+		       :if-exists :error
+		       :if-does-not-exist :create)
+    (when comment (princ
+		   (make-source-header-comment
+		    (sk-name self)
+		    :cchar #\#
+		    :timestamp t
+		    :description (sk-description self)
+		    :opts '("mode: makefile;"))
+		       out))
+    (sk-compile self out)))

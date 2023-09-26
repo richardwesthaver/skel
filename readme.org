@@ -251,24 +251,30 @@ The unit tests may also be a useful reference:
 
 #+RESULTS:
 #+begin_src lisp
-in suite SKEL with 4/4 tests:
-:DEBUG @ 80423.05 :: running test:  #<TEST VM :fn VM-test16870 :args NIL :persist NIL {100C99F123}> 
-:DEBUG @ 80423.055 :: #<PASS (LET ((VM (MAKE-SK-VM 201)))
-                               (DOTIMES (I 200) (SKS-POP VM))
-                               T)> 
-:DEBUG @ 80423.055 :: #<PASS (SKS-POP VM)> 
-#<PASS VM-TEST16870> 
-:DEBUG @ 80423.055 :: running test:  #<TEST SKELFILES :fn SKELFILES-test16869 :args NIL :persist NIL {100AE3F1A3}> 
-:DEBUG @ 80423.06 :: #<PASS (INIT-SKELFILE FILE)> 
-:DEBUG @ 80423.06 :: #<PASS (DELETE-FILE FILE)> 
-#<PASS SKELFILES-TEST16869> 
-:DEBUG @ 80423.06 :: running test:  #<TEST HEADER-COMMENTS :fn HEADER-COMMENTS-test16868 :args NIL :persist NIL {100AE3D9B3}> 
-:DEBUG @ 80423.07 :: #<PASS (EQ
+in suite SKEL with 5/5 tests:
+:DEBUG @ 87823.03 :: running test:  #<TEST VM :fn VM-test32511 :args NIL :persist NIL {10042BBCF3}> 
+:DEBUG @ 87823.05 :: #<PASS (LET ((VM (MAKE-SK-VM 201)))
+                              (DOTIMES (I 200) (SKS-POP VM))
+                              T)> 
+:DEBUG @ 87823.05 :: #<PASS (SKS-POP VM)> 
+#<PASS VM-TEST32511> 
+:DEBUG @ 87823.05 :: running test:  #<TEST MAKEFILE :fn MAKEFILE-test32510 :args NIL :persist NIL {10042BA1F3}> 
+:DEBUG @ 87823.05 :: #<PASS (FILE-EXISTS-P %TMP)> 
+#<PASS MAKEFILE-TEST32510> 
+:DEBUG @ 87823.05 :: running test:  #<TEST SKELFILE :fn SKELFILE-test32509 :args NIL :persist NIL {10042B8A03}> 
+:DEBUG @ 87823.055 :: #<PASS (INIT-SKELFILE %TMP)> 
+:DEBUG @ 87823.055 :: #<PASS (FILE-EXISTS-P %TMP)> 
+:DEBUG @ 87823.055 :: #<PASS (SK-MAKE-FILE
+                              (MAKE-INSTANCE 'SK-PROJECT NAME nada) PATH %TMP)> 
+:DEBUG @ 87823.055 :: #<PASS (FILE-EXISTS-P %TMP)> 
+#<PASS SKELFILE-TEST32509> 
+:DEBUG @ 87823.055 :: running test:  #<TEST HEADER-COMMENTS :fn HEADER-COMMENTS-test32508 :args NIL :persist NIL {10040E71A3}> 
+:DEBUG @ 87823.06 :: #<PASS (EQ
                              (TYPE-OF
                               (MAKE-SHEBANG-FILE-HEADER
                                (MAKE-SHEBANG-COMMENT /dev/null)))
                              'FILE-HEADER)> 
-:DEBUG @ 80423.07 :: #<PASS (EQ
+:DEBUG @ 87823.06 :: #<PASS (EQ
                              (TYPE-OF
                               (MAKE-SOURCE-FILE-HEADER
                                (MAKE-SOURCE-HEADER-COMMENT foo-test TIMESTAMP T
@@ -277,10 +283,10 @@ in suite SKEL with 4/4 tests:
                                                            OPTS
                                                            '(Definitely-Not_Emacs: T;))))
                              'FILE-HEADER)> 
-#<PASS HEADER-COMMENTS-TEST16868> 
-:DEBUG @ 80423.07 :: running test:  #<TEST SANITY :fn SANITY-test16867 :args NIL :persist NIL {100AE3B673}> 
-:DEBUG @ 80423.08 :: #<PASS (EQ T (APPLY #'/= (SKELS 1000)))> 
-#<PASS SANITY-TEST16867> 
+#<PASS HEADER-COMMENTS-TEST32508> 
+:DEBUG @ 87823.06 :: running test:  #<TEST SANITY :fn SANITY-test32507 :args NIL :persist NIL {10040E56A3}> 
+:DEBUG @ 87823.07 :: #<PASS (EQ T (APPLY #'/= (SKELS 1000)))> 
+#<PASS SANITY-TEST32507> 
 No tests failed.
 #+end_src
 
