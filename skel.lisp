@@ -177,6 +177,7 @@ via the special form stored in the `ast' slot."))
 (defstruct sk-vc-meta ""
 	   (kind *default-skel-vc-kind* :type vc-designator)
 	   (remotes))
+
 (defclass sk-project (skel sxp sk-meta)
   ((name :initarg :name :initform "" :type string)
    (vc :initarg :vc :initform (make-sk-vc-meta :kind *default-skel-vc-kind*) :type sk-vc-meta :accessor sk-vc)
@@ -203,21 +204,32 @@ via the special form stored in the `ast' slot."))
 	(error 'skel-syntax-error))))
 
 ;; obj -> ast
-(defmethod build-ast ((self sk-project) &key (nullp nil) (exclude '(ast id name)))
+(defmethod build-ast ((self sk-project) &key (nullp nil) (exclude '(ast id)))
   (setf (ast self)
-	(cons
-	 (sk-name self)
 	 (unwrap-object self
 			:slots t
 			:methods nil
 			:nullp nullp
-			:exclude exclude))))
+			:exclude exclude)))
 
-(defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase))
-  (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))
-
+;; TODO 2023-09-26: This belongs in sxp
+(defmethod write-sxp-stream ((self sk-project) stream &key (pretty t) (case :downcase) (fmt :collapsed))
+  (case fmt
+    (:collapsed
+     (if (listp (ast self))
+	 (loop for (k v . rest) on (ast self)
+	       by #'cddr
+	       unless (or (null v) (null k))
+		 do 
+		    (write k :stream stream :pretty pretty :case case :readably t :array t :escape t)
+		    (format stream " ")
+		    (write v :stream stream :pretty pretty :case case :readably t :array t :escape t)
+		    (format stream "~%"))
+	 (error 'sxp-fmt-error)))
+    (t (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))))
+     
 ;; ast -> file
-(defmethod make-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t))
+(defmethod make-skelfile ((self sk-project) &key (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical))
   (with-slots (ast) self
     (build-ast self :nullp nullp)
     (prog1 
@@ -232,7 +244,7 @@ via the special form stored in the `ast' slot."))
 			  :description (sk-description self)
 			  :opts '("mode: skel;"))
 			 out))
-	  (write-sxp-stream self out))
+	  (write-sxp-stream self out :fmt fmt))
       (setf ast nil))))
 
 ;;; File Headers
@@ -308,10 +320,10 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 	    (find-project-root next name)
 	    (warn "failed to find project root")))))
 
-(defun init-skelfile (&optional file name)
+(defun init-skelfile (&optional file name fmt)
   (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
 	(path (or file *default-skelfile*)))
-    (make-skelfile sk :path path)))
+    (make-skelfile sk :path path :fmt fmt)))
 
 ;;; Debug
 (defun describe-skeleton (skel &optional (stream t))
