@@ -174,10 +174,29 @@ via the special form stored in the `ast' slot."))
   (match nil :type form) 
   (expansion nil :type form))
 
+(defstruct sk-vc-remote-meta ""
+	   (name :default :type keyword)
+	   (path nil :type (or symbol string)))
+
+(defmethod write-sxp-stream ((self sk-vc-remote-meta) stream &key (pretty t) (case :downcase) (fmt :collapsed))
+  (write `(,(sk-vc-remote-meta-name self) ,(sk-vc-remote-meta-path self)) :stream stream :pretty pretty :case case :readably t :array t :escape t))
+
 (defstruct sk-vc-meta ""
 	   (kind *default-skel-vc-kind* :type vc-designator)
-	   (remotes))
+	   (remotes nil :type list))
 
+(defmethod write-sxp-stream ((self sk-vc-meta) stream &key (pretty t) (case :downcase) (fmt :collapsed))
+  (if (= 0 (length (sk-vc-meta-remotes self)))
+      (write (sk-vc-meta-kind self) :stream stream :pretty pretty :case case :readably t :array t :escape t)
+      (progn
+	(format stream "(")
+	(write (sk-vc-meta-kind self) :stream stream :pretty pretty :case case :readably t :array t :escape t)      
+	(format stream " ")
+	(loop for x in (sk-vc-meta-remotes self)
+	      do 
+		 (write-sxp-stream x stream :pretty pretty :case case :fmt fmt))
+	(format stream ")"))))
+  
 (defclass sk-project (skel sxp sk-meta)
   ((name :initarg :name :initform "" :type string)
    (vc :initarg :vc :initform (make-sk-vc-meta :kind *default-skel-vc-kind*) :type sk-vc-meta :accessor sk-vc)
@@ -223,7 +242,9 @@ via the special form stored in the `ast' slot."))
 		 do 
 		    (write k :stream stream :pretty pretty :case case :readably t :array t :escape t)
 		    (format stream " ")
-		    (write v :stream stream :pretty pretty :case case :readably t :array t :escape t)
+		    (if (or (eq (type-of v) 'skel) (subtypep (type-of v) 'structure-object))
+			(write-sxp-stream v stream :pretty pretty :case case)
+			(write v :stream stream :pretty pretty :case case :readably t :array t :escape t))
 		    (format stream "~%"))
 	 (error 'sxp-fmt-error)))
     (t (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))))
