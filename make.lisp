@@ -21,7 +21,8 @@
 ;;; Code:
 (defpackage :skel.make
   (:use :cl :skel :fmt)
-  (:export :makefile :push-rule :push-directive :push-var))
+  (:export :*default-makefile* :*makefile-extension*
+   :makefile :push-rule :push-directive :push-var))
 
 (in-package :skel.make)
 
@@ -30,10 +31,14 @@
 
 ;; https://www.gnu.org/software/make/manual/html_node/Makefile-Contents.html
 (defclass makefile (skel sk-meta)
-  ((directives :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-command) :accessor mk-directives)
-   (variables :initform (make-hash-table) :type (hash-table) :accessor mk-vars)
-   (explicit :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-rule) :accessor mk-erules)
-   (implicit :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-rule) :accessor mk-irules))
+  ((directives :initform (make-array 0 :element-type 'sk-command :adjustable t :fill-pointer 0) 
+	       :type (vector sk-command) :accessor mk-directives)
+   (variables :initform (make-hash-table) 
+	      :type (hash-table) :accessor mk-vars)
+   (explicit :initform (make-array 0 :element-type 'sk-rule :adjustable t :fill-pointer 0)
+	     :type (vector sk-rule) :accessor mk-erules)
+   (implicit :initform (make-array 0 :element-type 'sk-rule :adjustable t :fill-pointer 0) 
+	     :type (vector sk-rule) :accessor mk-irules))
   (:documentation "A virtual GNU Makefile."))
 
 (defmethod push-rule ((self sk-rule) (place makefile) &optional implicit)
@@ -54,15 +59,21 @@
     (with-slots (directives variables explicit implicit) self
       ;; directives
       (loop for d across directives
-	    do (format s "~A~%" d))
+	    do (sk-writeln d s))
       ;; variables
       (maphash (lambda (x y) (format s "~A=~A~%" x y)) variables)
       ;; explicit rules
       (loop for exp across explicit
-	    do (format s "~A:~A;~A~%" exp nil t))
+	    do (format s "~A:~A;~A~%" 
+		       (sk-write-string (sk-rule-target exp))
+		       (sk-write-string (sk-rule-source exp))
+		       (sk-write-string (sk-rule-recipe exp))))
       ;; TODO implicit rules
       (loop for imp across implicit
-	    do (format s "~A:~A;~A~%" imp nil t)))))
+	    do (format s "~A:~A;~A~%" 
+		       (sk-write-string (sk-rule-target imp))
+		       (sk-write-string (sk-rule-source imp))
+		       (sk-write-string (sk-rule-recipe imp)))))))
 
 (defmethod sk-write-file ((self makefile) &key (path *default-makefile*) (comment t) (if-exists :overwrite))
   (with-open-file (out path
@@ -79,4 +90,5 @@
 		   out))
     (sk-compile self out)))
 
-(defmethod sk-read-file ((self makefile) &key (path *default-makefile*)))
+(defmethod sk-read-file ((self makefile) &key (path *default-makefile*))
+  (declare (ignore path)))

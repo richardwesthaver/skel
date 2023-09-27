@@ -17,12 +17,14 @@
    :*default-skel-cache* :*default-user-skel-config* :*default-global-skel-config* :*skelfile-extension*
    :make-file-header :make-shebang-file-header :make-source-file-header :file-header-kind
    :make-source-header-comment :make-shebang-comment :*skelfile-boundary* :find-skelfile :load-skelfile
-   :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source :sk-recipe :sk-rule :sk-description
+   :skel :sk-meta :def-sk-class :sk-project :sk-target :sk-source
+   :sk-rule :sk-rule-target :sk-rule-source :sk-rule-recipe :make-sk-rule 
+   :sk-description
    :sk-kind :sk-rules :sk-id :sk-version :sk-name :sk-documents :sk-document :sk-command
    :sk-compile
    :sk-scripts :sk-script :sk-config :sk-snippets :sk-snippet :sk-abbrevs :sk-abbrev
    :describe-skeleton :describe-project :init-skelfile
-   :sk-write-file :sk-read-file
+   :sk-write :sk-write-string :sk-writeln :sk-write-file :sk-read-file
    :make-stack-slot :make-sk-vm :sks-ref :sks-pop :sks-push))
 
 (in-package :skel)
@@ -73,6 +75,9 @@
 (defgeneric sk-transform (self other &key &allow-other-keys))
 ;; TODO 2023-09-22: consider a skelfile-writer struct
 (defgeneric sk-read-file (self &key path &allow-other-keys))
+(defgeneric sk-write (self stream))
+(defgeneric sk-writeln (self stream))
+(defgeneric sk-write-string (self))
 (defgeneric sk-write-file (self &key path &allow-other-keys))
 			   
 ;;; Objects
@@ -124,27 +129,51 @@
      self))
 
 (defclass sk-command (skel)
-  ())
+  ((body :initform nil :initarg :body :type form :accessor sk-body)))
+
+(defmethod sk-write ((self sk-command) stream)
+  (if (stringp (sk-body self)) (format stream "~A" (sk-body self))))
+
+(defmethod sk-write-string ((self sk-command))
+  (with-output-to-string (s)
+    (sk-write self s)))
+    
+(defmethod sk-writeln ((self sk-command) stream) 
+  (sk-write self stream)
+  (format stream "~%"))
+
+;;  HACK 2023-09-27: (defstruct sk-url) ?
 
 (defclass sk-target (skel)
-  ())
+  ((path :initform "" :initarg :path :type string :accessor sk-path)))
+
+(defmethod sk-write ((self sk-target) stream)
+  (if (stringp (sk-path self)) (format stream "~A" (sk-path self))))
+
+(defmethod sk-write-string ((self sk-target))
+  (with-output-to-string (s)
+    (sk-write self s)))
 
 (defclass sk-source (skel)
-  ())
+  ((path :initform "" :initarg :path :type string :accessor sk-path)))
 
-(defclass sk-recipe (skel)
-  ((body :initarg :commands :initform nil :type list :accessor sk-body)))
+(defmethod sk-write ((self sk-source) stream)
+  (if (stringp (sk-path self)) (format stream "~A" (sk-path self))))
+
+(defmethod sk-write-string ((self sk-source))
+  (with-output-to-string (s)
+    (sk-write self s)))
 
 (defclass sk-rule (skel)
-  ((target :initarg :target :type sk-target)
-   (source :initarg :source :type sk-source)
-   (recipe :initarg :recipe :type sk-recipe))
+  ((target :initarg :target :type sk-target :accessor sk-rule-target)
+   (source :initarg :source :type sk-source :accessor sk-rule-source)
+   (recipe :initarg :recipe :type sk-command :accessor sk-rule-recipe))
   (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
 via the special form stored in the `ast' slot."))
 
-(defmacro sk-make-rule (target source &body recipe)
+(defmacro make-sk-rule (target source &body recipe)
   "Make a new SK-RULE."
-  `(let ((r (make-instance 'sk-recipe :body ',recipe)))
+  `(let ((r (make-instance 'sk-command :body ,@recipe)))
      (make-instance 'sk-rule :target ,target :source ,source :recipe r)))
 
 (defclass sk-document (skel sk-meta sxp)

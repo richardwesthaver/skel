@@ -49,18 +49,19 @@ the appropriate restarts."
     (is (sk-write-file (make-instance 'sk-project :name "nada" :path %tmp) :if-exists :overwrite))
     (setq %tmp (tmp-path "sk"))
     (is (init-skelfile %tmp))
+    (is (load-skelfile %tmp))
     (is (build-ast (sk-read-file (make-instance 'sk-project) :path %tmp)))))
 
 (deftest makefile ()
   "Make sure makefiles are making out ok."
     (do-tmp-path (tmp-path "mk")
-      (let* ((mk (make-instance 'makefile :name "foobar" :path %tmp))
-	     (tar (make-instance 'sk-target))
-	     (src (make-instance 'sk-source))
-	     (cmd (make-instance 'sk-command))
-	     (rec (make-instance 'sk-recipe :commands `(,cmd)))
-	     (rule (make-instance 'sk-rule :source src :target tar :recipe rec)))
-	(is (null (sk-write-file mk :if-exists :overwrite)))
+      (let* ((mk (make-instance 'makefile :name "foobar" :path %tmp :description "barfood"))
+	     (tar (make-instance 'sk-target :path "foo.lisp"))
+	     (src (make-instance 'sk-source :path "bar.c"))
+	     (cmd (make-instance 'sk-command :body "echo 'muahaha'"))
+	     (rule (make-sk-rule tar src "echo 'yolo'")))
+	#-nil
+	(is (null (sk-write-file mk :if-exists :supersede :path *default-makefile*)))
 	(is (push-rule rule mk))
 	(is (push-rule rule mk))
 	(is (push-rule rule mk t))
@@ -69,7 +70,7 @@ the appropriate restarts."
 	(is (push-directive cmd mk))
 	(is (push-var '(a b) mk))
 	(is (push-var '(b c) mk))
-	(is (null (sk-write-file mk :if-exists :overwrite))))))
+	(is (null (sk-write-file mk :if-exists :supersede))))))
 
 (deftest vm ()
   "EXPERIMENTAL"
@@ -80,4 +81,3 @@ the appropriate restarts."
   (let ((vm (make-sk-vm 1)))
     (is (sks-pop vm))
     (signals simple-error (sks-pop vm))))
-
