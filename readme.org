@@ -238,9 +238,7 @@ skel init --vc hg --fmt canonical
 The unit tests may also be a useful reference:
 
 #+begin_src lisp :results output replace :wrap src lisp :exports both :package :skel.tests
-  ;; (ql:quickload :macs)
-  ;; (ql:quickload :skel)
-  ;; (ql:quickload :skel/tests)
+  (compile-file "tests.lisp")
   (load "tests.lisp")
   (in-package :skel.tests)
   (setq log:*log-level* :debug)
@@ -251,56 +249,61 @@ The unit tests may also be a useful reference:
 
 #+RESULTS:
 #+begin_src lisp
+; compiling file "/home/ellis/dev/skel/tests.lisp" (written 27 SEP 2023 07:42:03 PM):
+
+; wrote /home/ellis/dev/skel/tests.fasl
+; compilation finished in 0:00:00.010
 in suite SKEL with 5/5 tests:
-:DEBUG @ 78767.16 :: running test:  #<TEST VM :fn VM-test52297 :args NIL :persist NIL {1006BAAE03}> 
-:DEBUG @ 78767.164 :: #<PASS (LET ((VM (MAKE-SK-VM 201)))
-                               (DOTIMES (I 200) (SKS-POP VM))
+:DEBUG @ 94.520004 :: running test:  #<TEST VM :fn VM-test2324 :args NIL :persist NIL {1006F848B3}> 
+:DEBUG @ 94.526665 :: #<PASS (LET ((VM (MAKE-SK-VM C9)))
+                               (DOTIMES (I C8) (SKS-POP VM))
                                T)> 
-:DEBUG @ 78767.164 :: #<PASS (SKS-POP VM)> 
-#<PASS VM-TEST52297> 
-:DEBUG @ 78767.164 :: running test:  #<TEST MAKEFILE :fn MAKEFILE-test52296 :args NIL :persist NIL {1006BA90F3}> 
-:DEBUG @ 78767.18 :: #<PASS (NULL
-                             (SK-WRITE-FILE MK IF-EXISTS SUPERSEDE PATH
-                                            ,*DEFAULT-MAKEFILE*))> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-RULE RULE MK)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-RULE RULE MK)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-RULE RULE MK T)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-RULE RULE MK T)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-DIRECTIVE CMD MK)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-DIRECTIVE CMD MK)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-VAR '(A B) MK)> 
-:DEBUG @ 78767.18 :: #<PASS (PUSH-VAR '(B C) MK)> 
-:DEBUG @ 78767.18 :: #<PASS (NULL (SK-WRITE-FILE MK IF-EXISTS SUPERSEDE))> 
-#<PASS MAKEFILE-TEST52296> 
-:DEBUG @ 78767.18 :: running test:  #<TEST SKELFILE :fn SKELFILE-test52295 :args NIL :persist NIL {1006B4D783}> 
-:DEBUG @ 78767.21 :: #<PASS (SK-WRITE-FILE
+:DEBUG @ 94.526665 :: #<PASS (SKS-POP VM)> 
+#<PASS VM-TEST2324> 
+:DEBUG @ 94.526665 :: running test:  #<TEST MAKEFILE :fn MAKEFILE-test2323 :args NIL :persist NIL {1006F82D23}> 
+:DEBUG @ 94.55 :: #<PASS (NULL
+                          (SK-WRITE-FILE (MK) IF-EXISTS SUPERSEDE PATH
+                                         ,*DEFAULT-MAKEFILE*))> 
+:DEBUG @ 94.56 :: #<PASS (PUSH-RULE R1 MK1)> 
+:DEBUG @ 94.56 :: #<PASS (PUSH-RULE R2 MK1)> 
+:DEBUG @ 94.56 :: #<PASS (PUSH-DIRECTIVE
+                          (CMD ifeq ($(DEBUG),1) echo foo 
+endif)
+                          MK1)> 
+:DEBUG @ 94.56 :: #<PASS (PUSH-VAR '(A B) MK1)> 
+:DEBUG @ 94.56 :: #<PASS (PUSH-VAR '(B C) MK1)> 
+:DEBUG @ 94.56 :: #<PASS (NULL
+                          (SK-WRITE-FILE MK1 IF-EXISTS SUPERSEDE PATH test.mk))> 
+#<PASS MAKEFILE-TEST2323> 
+:DEBUG @ 94.56 :: running test:  #<TEST SKELFILE :fn SKELFILE-test2322 :args NIL :persist NIL {1006F362A3}> 
+:DEBUG @ 94.57667 :: #<PASS (SK-WRITE-FILE
                              (MAKE-INSTANCE 'SK-PROJECT NAME nada PATH %TMP)
                              IF-EXISTS OVERWRITE)> 
-:DEBUG @ 78767.21 :: #<PASS (INIT-SKELFILE %TMP)> 
-:DEBUG @ 78767.21 :: #<PASS (LOAD-SKELFILE %TMP)> 
-:DEBUG @ 78767.21 :: #<PASS (BUILD-AST
+:DEBUG @ 94.57667 :: #<PASS (INIT-SKELFILE %TMP)> 
+:DEBUG @ 94.57667 :: #<PASS (LOAD-SKELFILE %TMP)> 
+:DEBUG @ 94.57667 :: #<PASS (BUILD-AST
                              (SK-READ-FILE (MAKE-INSTANCE 'SK-PROJECT) PATH
                                            %TMP))> 
-#<PASS SKELFILE-TEST52295> 
-:DEBUG @ 78767.21 :: running test:  #<TEST HEADER-COMMENTS :fn HEADER-COMMENTS-test52294 :args NIL :persist NIL {1006B4B783}> 
-:DEBUG @ 78767.21 :: #<PASS (EQ
-                             (TYPE-OF
-                              (MAKE-SHEBANG-FILE-HEADER
-                               (MAKE-SHEBANG-COMMENT /dev/null)))
-                             'FILE-HEADER)> 
-:DEBUG @ 78767.21 :: #<PASS (EQ
-                             (TYPE-OF
-                              (MAKE-SOURCE-FILE-HEADER
-                               (MAKE-SOURCE-HEADER-COMMENT foo-test TIMESTAMP T
-                                                           DESCRIPTION
-                                                           nothing to see here
-                                                           OPTS
-                                                           '(Definitely-Not_Emacs: T;))))
-                             'FILE-HEADER)> 
-#<PASS HEADER-COMMENTS-TEST52294> 
-:DEBUG @ 78767.21 :: running test:  #<TEST SANITY :fn SANITY-test52293 :args NIL :persist NIL {1006B49943}> 
-:DEBUG @ 78767.22 :: #<PASS (EQ T (APPLY #'/= (SKELS 1000)))> 
-#<PASS SANITY-TEST52293> 
+#<PASS SKELFILE-TEST2322> 
+:DEBUG @ 94.57667 :: running test:  #<TEST HEADER-COMMENTS :fn HEADER-COMMENTS-test2321 :args NIL :persist NIL {1006F34273}> 
+:DEBUG @ 94.58 :: #<PASS (EQ
+                          (TYPE-OF
+                           (MAKE-SHEBANG-FILE-HEADER
+                            (MAKE-SHEBANG-COMMENT /dev/null)))
+                          'FILE-HEADER)> 
+:DEBUG @ 94.58 :: #<PASS (EQ
+                          (TYPE-OF
+                           (MAKE-SOURCE-FILE-HEADER
+                            (MAKE-SOURCE-HEADER-COMMENT foo-test TIMESTAMP T
+                                                        DESCRIPTION
+                                                        nothing to see here
+                                                        OPTS
+                                                        '(Definitely-Not_Emacs: T;))))
+                          'FILE-HEADER)> 
+#<PASS HEADER-COMMENTS-TEST2321> 
+:DEBUG @ 94.58 :: running test:  #<TEST SANITY :fn SANITY-test2320 :args NIL :persist NIL {1006F326E3}> 
+:DEBUG @ 94.583336 :: #<PASS (EQ T (APPLY #'/= (SKELS 3E8)))> 
+#<PASS SANITY-TEST2320> 
 No tests failed.
 #+end_src
 

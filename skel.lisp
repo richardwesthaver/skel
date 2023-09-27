@@ -165,8 +165,9 @@
     (sk-write self s)))
 
 (defclass sk-rule (skel)
-  ((target :initarg :target :type sk-target :accessor sk-rule-target)
-   (source :initarg :source :type sk-source :accessor sk-rule-source)
+  ;; if target is a string, treated as a PHONY.
+  ((target :initarg :target :type (or sk-target string) :accessor sk-rule-target)
+   (source :initform nil :initarg :source :type (or sk-source null) :accessor sk-rule-source)
    (recipe :initarg :recipe :type sk-command :accessor sk-rule-recipe))
   (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
 via the special form stored in the `ast' slot."))
@@ -175,6 +176,13 @@ via the special form stored in the `ast' slot."))
   "Make a new SK-RULE."
   `(let ((r (make-instance 'sk-command :body ,@recipe)))
      (make-instance 'sk-rule :target ,target :source ,source :recipe r)))
+
+(defmethod sk-write ((self sk-rule) stream)
+  (with-slots (target source recipe) self
+    (sk-write-string target)
+    (sk-write-string source)
+    (sk-write-string recipe)))
+
 
 (defclass sk-document (skel sk-meta sxp)
   ())

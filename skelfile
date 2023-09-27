@@ -1,9 +1,6 @@
-;;; nada @ 2023-09-27.21:13:43 -*- mode: skel; -*-
-(:name "nada" :path #A((14) base-char . "/tmp/G52299.sk") :vc
- #S(skel::sk-vc-meta :kind :hg :remotes nil))ind :lisp
-:description "A hacker's project compiler"
-:license "MPL"
-:vc (hg :default "https://lab.rwest.io/ellis/skel"
+;;; nada @ 2023-09-27.23:42:08 -*- mode: skel; -*-
+(:name "nada" :path #A((13) base-char . "/tmp/G2331.sk") :vc
+ #S(skel::sk-vc-meta :kind :hg :remotes nil))lab.rwest.io/ellis/skel"
 	:mirror (git "https://github.com/richardwesthaver/skel"))
 :rules 
 ((compile () (compile-system :skel))

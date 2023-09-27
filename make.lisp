@@ -20,14 +20,27 @@
 
 ;;; Code:
 (defpackage :skel.make
-  (:use :cl :skel :fmt)
+  (:use :cl :skel :fmt :sxp)
   (:export :*default-makefile* :*makefile-extension*
-   :makefile :push-rule :push-directive :push-var))
+	   :makefile :push-rule :push-directive :push-var))
 
 (in-package :skel.make)
 
 (defparameter *default-makefile* "makefile")
 (defparameter *makefile-extension* "mk")
+
+(deftype mk-val-designator () '(member nil :simple :immediate :conditional :recursive :once :append :shell))
+
+;;  TODO 2023-09-27: what is $(@D) ?? (target-dir)
+(defvar +mk-magic-vars+ #(#\@ #\< #\^ #\* #\+ #\? #\|))
+
+(defvar +mk-command-prefixes+ #(#\@ #\- #\+))
+
+(defstruct mk-val "" (kind nil :type mk-val-designator)  (val nil :type form))
+
+(defstruct mk-var ""
+	   (key "" :type string)
+	   (val (make-mk-val) :type mk-val))
 
 ;; https://www.gnu.org/software/make/manual/html_node/Makefile-Contents.html
 (defclass makefile (skel sk-meta)
@@ -86,7 +99,7 @@
 		    :cchar #\#
 		    :timestamp t
 		    :description (sk-description self)
-		    :opts '("mode: makefile;"))
+		    :opts '("mode: makefile-gmake;"))
 		   out))
     (sk-compile self out)))
 
