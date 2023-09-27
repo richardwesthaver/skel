@@ -1,6 +1,6 @@
 ;;; tests.lisp --- skel tests
 (defpackage :skel.tests
-  (:use :cl :skel :skel.make :skel.asdf :skel.vc :rt)
+  (:use :cl :skel :skel.make :skel.asdf :skel.vc :rt :sxp)
   (:import-from :uiop :file-exists-p))
 
 (in-package :skel.tests)
@@ -9,10 +9,10 @@
 (in-suite :skel)
 
 (defvar %tmp)
-(defun gen-tmp-path (ext)
+(defun tmp-path (ext)
   (setq %tmp (format nil "/tmp/~A.~A" (gensym) ext)))
 
-(defun with-tmp-file (file &rest body)
+(defun do-tmp-path (file &rest body)
   (prog1 body
     (when (file-exists-p file) (delete-file file))))
 
@@ -45,16 +45,30 @@ make-shebang-comment, and make-shebang-file-header."
 (deftest skelfile ()
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
-  (with-tmp-file (gen-tmp-path "sk")
+  (do-tmp-path (tmp-path "sk")
     (is (sk-write-file (make-instance 'sk-project :name "nada" :path %tmp) :if-exists :overwrite))
-    (setq %tmp (gen-tmp-path "sk"))
+    (setq %tmp (tmp-path "sk"))
     (is (init-skelfile %tmp))
-    (is (print (sk-read-file (make-instance 'sk-project) :path %tmp)))))
+    (is (build-ast (sk-read-file (make-instance 'sk-project) :path %tmp)))))
 
 (deftest makefile ()
   "Make sure makefiles are making out ok."
-    (with-tmp-file (gen-tmp-path "mk")
-      (let ((mk (make-instance 'makefile :name "foobar" :path %tmp)))
+    (do-tmp-path (tmp-path "mk")
+      (let* ((mk (make-instance 'makefile :name "foobar" :path %tmp))
+	     (tar (make-instance 'sk-target))
+	     (src (make-instance 'sk-source))
+	     (cmd (make-instance 'sk-command))
+	     (rec (make-instance 'sk-recipe :commands `(,cmd)))
+	     (rule (make-instance 'sk-rule :source src :target tar :recipe rec)))
+	(is (null (sk-write-file mk :if-exists :overwrite)))
+	(is (push-rule rule mk))
+	(is (push-rule rule mk))
+	(is (push-rule rule mk t))
+	(is (push-rule rule mk t))
+	(is (push-directive cmd mk))
+	(is (push-directive cmd mk))
+	(is (push-var '(a b) mk))
+	(is (push-var '(b c) mk))
 	(is (null (sk-write-file mk :if-exists :overwrite))))))
 
 (deftest vm ()

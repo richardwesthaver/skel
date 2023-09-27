@@ -21,7 +21,7 @@
 ;;; Code:
 (defpackage :skel.make
   (:use :cl :skel :fmt)
-  (:export :makefile))
+  (:export :makefile :push-rule :push-directive :push-var))
 
 (in-package :skel.make)
 
@@ -30,23 +30,23 @@
 
 ;; https://www.gnu.org/software/make/manual/html_node/Makefile-Contents.html
 (defclass makefile (skel sk-meta)
-  ((directives :initform #() :type (vector sk-command) :accessor mk-directives)
+  ((directives :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-command) :accessor mk-directives)
    (variables :initform (make-hash-table) :type (hash-table) :accessor mk-vars)
-   (explicit :initform #() :type (vector sk-rule) :accessor mk-erules)
-   (implicit :initform #() :type (vector sk-rule) :accessor mk-irules))
+   (explicit :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-rule) :accessor mk-erules)
+   (implicit :initform (make-array 0 :adjustable t :fill-pointer 0) :type (vector sk-rule) :accessor mk-irules))
   (:documentation "A virtual GNU Makefile."))
 
-(defmethod push-rule ((self makefile) (rule sk-rule) &optional implicit)
+(defmethod push-rule ((self sk-rule) (place makefile) &optional implicit)
   (if implicit
-      (vector-push rule (mk-irules self))
-      (vector-push rule (mk-erules self))))
+      (vector-push-extend self (mk-irules place))
+      (vector-push-extend self (mk-erules place))))
 
-(defmethod push-directive ((self makefile) directive)
-  (vector-push directive (mk-directives self)))
+(defmethod push-directive ((self sk-command) (place makefile))
+  (vector-push-extend self (mk-directives place)))
 
-(defmethod push-var ((self makefile) var)
-  (destructuring-bind (k v) var
-    (setf (gethash k (mk-directives self)) v)))
+(defmethod push-var ((self cons) (place makefile))
+  (destructuring-bind (k v) self
+    (setf (gethash k (mk-vars place)) v)))
 
 (defmethod sk-compile ((self makefile) stream &key &allow-other-keys)
   "Compile the makefile SELF to output STREAM."
@@ -76,5 +76,7 @@
 		    :timestamp t
 		    :description (sk-description self)
 		    :opts '("mode: makefile;"))
-		       out))
+		   out))
     (sk-compile self out)))
+
+(defmethod sk-read-file ((self makefile) &key (path *default-makefile*)))

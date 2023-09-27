@@ -255,7 +255,8 @@ via the special form stored in the `ast' slot."))
 ;; file -> ast
 ;; allow-comment?
 (defmethod sk-read-file ((self sk-project) &key (path *default-skelfile*))
-  (wrap self (read-sxp-file path)))
+  (wrap self (read-file-forms path))
+  self)
 
 ;; ast -> file
 (defmethod sk-write-file ((self sk-project) 

@@ -1,5 +1,5 @@
-;;; nada @ 2023-09-26.23:56:50 -*- mode: skel; -*-
-(:name "nada" :path #A((14) base-char . "/tmp/G34843.sk") :vc
+;;; nada @ 2023-09-27.19:47:51 -*- mode: skel; -*-
+(:name "nada" :path #A((14) base-char . "/tmp/G46559.sk") :vc
  #S(skel::sk-vc-meta :kind :hg :remotes nil))ind :lisp
 :description "A hacker's project compiler"
 :license "MPL"

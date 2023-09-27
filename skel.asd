@@ -25,7 +25,7 @@
   :components ((:file "cli")))
 
 (defsystem "skel/tests"
-  :depends-on (:skel :macs :macs/rt)
+  :depends-on (:skel :macs :macs/rt :sxp)
   :components ((:file "tests"))
   :perform (test-op (op c) (uiop:symbol-call '#:macs.rt '#:do-tests)))
 
