@@ -46,8 +46,9 @@ make-shebang-comment, and make-shebang-file-header."
   "Ensure skelfiles are created and loaded correctly and that they signal
 the appropriate restarts."
   (do-tmp-path (tmp-path "sk")
-    (is (sk-write-file (make-instance 'sk-project :name "nada" :path %tmp) :if-exists :overwrite))
-    (setq %tmp (tmp-path "sk"))
+    (is (sk-write-file (make-instance 'sk-project :name "nada" :path %tmp) :path %tmp :if-exists :supersede))
+    (ignore-errors (delete-file %tmp))
+    (setf %tmp (tmp-path "sk"))
     (is (init-skelfile %tmp))
     (is (load-skelfile %tmp))
     (is (build-ast (sk-read-file (make-instance 'sk-project) :path %tmp)))))
@@ -61,8 +62,7 @@ the appropriate restarts."
 	     (src (path) (make-instance 'sk-source :path path))
 	     (cmd (body) (make-instance 'sk-command :body body))
 	     (rule (tr sr bd) (make-sk-rule tr sr bd)))
-	#-nil
-	(is (null (sk-write-file (mk) :if-exists :supersede :path *default-makefile*)))
+	(is (null (sk-write-file (mk) :if-exists :supersede :path (tmp-path "mk"))))
 	(let* ((tr1 (tar (tmp-path "t1")))
 	       (tr2 (tar (tmp-path "t2")))
 	       (sr (src (tmp-path "s1")))
@@ -81,7 +81,7 @@ endif")
 	  ;; (is (push-directive (cmd "") mk1))
 	  (is (push-var '(a b) mk1))
 	  (is (push-var '(b c) mk1))
-	  (is (null (sk-write-file mk1 :if-exists :supersede :path "test.mk")))))))
+	  (is (null (sk-write-file mk1 :if-exists :supersede :path (tmp-path "mk"))))))))
 
 (deftest vm ()
   "EXPERIMENTAL"

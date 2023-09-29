@@ -21,20 +21,24 @@
 ;;; Code:
 (defpackage :skel.make
   (:use :cl :skel :fmt :sxp)
-  (:export :*default-makefile* :*makefile-extension*
-	   :makefile :push-rule :push-directive :push-var))
+  (:export 
+   :*default-makefile* :*makefile-extension* 
+   :*mk-magic-vars* :*mk-command-prefixes*
+   :mk-val-designator 
+   :mk-val :mk-var
+   :makefile :push-rule :push-directive :push-var))
 
 (in-package :skel.make)
 
 (defparameter *default-makefile* "makefile")
 (defparameter *makefile-extension* "mk")
 
-(deftype mk-val-designator () '(member nil :simple :immediate :conditional :recursive :once :append :shell))
-
 ;;  TODO 2023-09-27: what is $(@D) ?? (target-dir)
-(defvar +mk-magic-vars+ #(#\@ #\< #\^ #\* #\+ #\? #\|))
+(defvar *mk-magic-vars* #(#\@ #\< #\^ #\* #\+ #\? #\|))
 
-(defvar +mk-command-prefixes+ #(#\@ #\- #\+))
+(defvar *mk-command-prefixes* #(#\@ #\- #\+))
+
+(deftype mk-val-designator () '(member nil :simple :immediate :conditional :recursive :once :append :shell))
 
 (defstruct mk-val "" (kind nil :type mk-val-designator)  (val nil :type form))
 
