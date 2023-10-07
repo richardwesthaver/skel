@@ -15,7 +15,9 @@
   :opts (make-opts 
 	  (:name help :description "print this message")
 	  (:name version :description "print version")
-	  (:name log :global t :description "set log level (debug,info,trace,warn)")
+	  (:name debug 
+	   :global t :description "set log level (debug,info,trace,warn)"
+	   :thunk (lambda (&optional x) (setq *log-level* x)))
 	  (:name input :description "input source")
 	  (:name output :description "output target"))
   :cmds (make-cmds
@@ -36,7 +38,9 @@
 
 (defun run ()
   (with-cli (opts cmds) $cli
-    (when (find-opt $cli "debug" t) (setq *log-level* :debug))
+    (loop for o in (active-opts $cli t)
+	  do (do-opt o))
+    (debug! (cli-opts $cli) (cli-cmd-args $cli) (cli-cmds $cli))
     (cond
       ((member "build" *argv* :test #'string=) (nyi!))
       ((member "describe" *argv* :test #'string=) (describe (find-skelfile #P"." :load t)))
