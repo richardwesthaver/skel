@@ -2,13 +2,13 @@
 
 ;;; Code:
 (defpackage skel.cli
-  (:use :cl :cond :cli :skel :fmt)
+  (:use :cl :cond :cli :skel :fmt :log)
   (:import-from :sb-posix :getcwd)
   (:export :main))
 
 (in-package :skel.cli)
 
-(define-cli :var $cli
+(define-cli $cli
   :name "skel"
   :version "0.1.1"
   :description "A hacker's project compiler and build tool."
@@ -36,6 +36,7 @@
 
 (defun run ()
   (with-cli (opts cmds) $cli
+    (when (find-opt $cli "debug" t) (setq *log-level* :debug))
     (cond
       ((member "build" *argv* :test #'string=) (nyi!))
       ((member "describe" *argv* :test #'string=) (describe (find-skelfile #P"." :load t)))

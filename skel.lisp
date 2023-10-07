@@ -396,7 +396,6 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 	(path (or file *default-skelfile*)))
     (sk-write-file sk :path path :fmt fmt)))
 
-;;; Debug
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
   (print-object skel stream)
