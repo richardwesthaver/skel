@@ -46,24 +46,27 @@ skel v0.1.1
   usage: skel [global] <command> [<arg>]
 
   A hacker's project compiler and build tool.
-
   options:
-     -h/--help  :  print this message
-     -v/--version  :  print version
-     -l/--log* :  set log level (debug,info,trace,warn)
+     -h/--help* :  print this message
+     -v/--version* :  print version
+     -d/--debug* :  set log level (debug,info,trace,warn)
      -i/--input  :  input source
      -o/--output  :  output target
-
   commands:
     status  :  print the status of the current project
+    
     init  :  initialize a skelfile in the current directory
      -n/--name  :  project name
      -k/--kind  :  project kind
+    
     describe  :  describe the project skelfile
      -f/--file  :  path to skelfile
+    
     build  :  build artifacts
      -t/--target  :  target artifact to build
+    
     run  
+    
 #+end_example
 
 Here's skel's skelfile:
@@ -116,32 +119,32 @@ The =describe= command can be used to check the currently active
 skelfile, printing any errors and the parsed object.
 
 #+begin_src shell :results output replace :exports both
-  ./skel describe
+  skel describe
 #+end_src
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 061e-4558-2d6e-2314>
+#<SKEL:SK-PROJECT :ID 3b53-0c04-deb7-2355>
   [standard-object]
 
 Slots with :INSTANCE allocation:
-  NAME                           = SKEL
-  PATH                           = "/home/ellis/dev/skel"
-  AUTHOR                         = "Richard Westhaver <ellis@rwest.io>"
-  VERSION                        = "0.1.0"
-  KIND                           = :LISP
-  DESCRIPTION                    = "A hacker's project compiler"
-  LICENSE                        = "MPL"
+  NAME                           = "dev"
+  PATH                           = "/home/ellis/dev"
+  AUTHOR                         = #<unbound slot>
+  VERSION                        = #<unbound slot>
+  KIND                           = #<unbound slot>
+  DESCRIPTION                    = NIL
+  LICENSE                        = #<unbound slot>
   AST                            = NIL
-  ID                             = 440866058550518548
-  VC                             = (HG :DEFAULT "https://lab.rwest.io/ellis/skel" :MIRROR..
-  RULES                          = ((COMPILE NIL (COMPILE-SYSTEM :SKEL))..
-  DOCUMENTS                      = ("readme.org")
-  SCRIPTS                        = ((YOLO NIL "a yolo commit" (HG-AR ./&) (HG-CI -M YOLO) (HG-PUSH)..
+  ID                             = 4274773686360679253
+  VC                             = :HG
+  RULES                          = NIL
+  DOCUMENTS                      = NIL
+  SCRIPTS                        = NIL
   SNIPPETS                       = NIL
-  STASH                          = (:LOCAL ".stash" :REMOTE (:HG "https://lab.rwest.io/packy/stash"))
-  SHED                           = (:LOCAL ".shed" :REMOTE (:HG "https://lab.rwest.io/packy/shed"))
-  ABBREVS                        = ((ISK INIT-SKELFILE) (DSK DESCRIBE-SKELETON) (FSK FIND-SKELFILE)..
+  STASH                          = NIL
+  SHED                           = NIL
+  ABBREVS                        = NIL
 #+end_example
 ** TODO compile
 Skelfiles can be compiled to produce a new project skeleton or update
