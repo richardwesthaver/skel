@@ -11,16 +11,13 @@
 
 ;; - An ASDF plugin for integrating skel into ASDF system definitions
 
-;; - An ASDF system definition compiler
+;; - An ASDF system definition compiler - defined in the package :skel.comp.asd
 
 ;; Refs: 
 
 ;; - https://github.com/atlas-engineer/nyxt/tree/master/libraries/nasdf
 
 ;;; Code:
-(defpackage :skel.asdf
-  (:use :cl :sxp)
-  (:export :sk-asdf))
+(in-package :skel)
 
-(in-package :skel.asdf)
-
+(defpackage :skel.ext.asdf)

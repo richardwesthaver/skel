@@ -37,6 +37,8 @@
 ;; hg serve --no-profile --cmdserver chgunix --address @INITSOCKNAME --daemon-postexec chdir:/ @DIR
 
 ;;; Code:
+(in-package :skel)
+
 (defpackage :skel.vc
   (:use :sb-bsd-sockets :cl :skel)
   (:import-from :sb-posix :getcwd)
