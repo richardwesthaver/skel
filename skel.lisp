@@ -394,7 +394,7 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 (defun init-skelfile (&optional file name fmt)
   (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
 	(path (or file *default-skelfile*)))
-    (sk-write-file sk :path path :fmt fmt)))
+    (sk-write-file sk :path path :fmt fmt :if-exists)))
 
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
