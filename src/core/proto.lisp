@@ -1,4 +1,5 @@
 ;;; Proto
+(in-package :skel)
 (defgeneric sk-run (self))
 (defgeneric sk-new (self))
 (defgeneric sk-save (self))

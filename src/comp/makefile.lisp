@@ -1,4 +1,4 @@
-;;; make.lisp --- GNU Makefile support for Skel
+;;; makefile.lisp --- GNU Makefile compiler
 
 ;; GNU Makefile compiler.
 
@@ -19,6 +19,8 @@
 ;; https://www.gnu.org/software/make/manual/html_node/Parsing-Makefiles.html
 
 ;;; Code:
+(in-package :skel)
+
 (defpackage :skel.make
   (:use :cl :skel :fmt :sxp)
   (:export 

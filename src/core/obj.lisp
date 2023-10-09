@@ -1,4 +1,6 @@
 ;;; Objects
+(in-package :skel)
+
 (defclass skel ()
   ((id :initarg :id :initform (sxhash nil) :accessor sk-id :type fixnum))
   (:documentation "Base class for skeleton objects. Inherits from `sxp'."))

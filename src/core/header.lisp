@@ -1,4 +1,5 @@
 ;;; File Headers
+(in-package :skel)
 (deftype file-header-kind () '(member :source :shebang))
 
 (declaim (inline %make-file-header))
