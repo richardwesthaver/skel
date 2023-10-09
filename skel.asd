@@ -44,7 +44,7 @@
 		((:file "asdf")))))
 
 (defsystem "skel/cli"
-  :depends-on (:skel :macs)
+  :depends-on (:skel :macs :cli)
   :version "0.1.0"
   :build-operation "program-op"
   :build-pathname "skel"
