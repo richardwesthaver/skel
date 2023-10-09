@@ -1,11 +1,26 @@
 ;;; Utils
 (in-package :skel)
 
+(declaim (inline file-read-forms))
+(defun file-read-forms (file)
+  (let ((form (read-file-forms file)))
+    (if (cdr form)
+	form
+	(car form))))
+    
+(defun init-skelrc (&optional file)
+  "Initialize a skelrc configuration based on the currently active
+defaults. Defaults to ~/.skelrc."
+  (sk-write-file *skel-user-config* :path (or file *default-skelrc*) :fmt :collapsed))
+
+(defun load-skelrc (&optional file)
+  "Load a skelrc configuration from FILE. Defaults to ~/.skelrc."
+  (let ((form (file-read-forms file)))
+    (load-ast (make-instance 'sk-user-config :ast form :id (sxhash form)))))
+
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
-  (let ((form (read-file-forms file)))
-    (when (= 1 (length form)) ;; a single form - unwrap it
-      (setq form (car form)))
+  (let ((form (file-read-forms file)))
     (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
 
 (defun find-skelfile (start &key (load nil) (name *default-skelfile*) (walk t))
@@ -32,14 +47,16 @@ return nil. When LOAD is non-nil, load the skelfile if found."
   (if (probe-file (merge-pathnames name path))
       path
       (let ((next (pathname-parent-directory-pathname path)))
-	(if (eql path next)
-	    (find-project-root next name)
-	    (warn "failed to find project root")))))
+	(when (eql path next)
+	  (find-project-root next name)))))
 
-(defun init-skelfile (&optional file name fmt)
+(defun init-skelfile (&optional file name cfg)
+  "Initialize a skelfile."
   (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
-	(path (or file *default-skelfile*)))
-    (sk-write-file sk :path path :fmt fmt :if-exists)))
+	(path (or file *default-skelfile*))
+	(fmt :collapsed))
+    (when cfg (setf sk (sk-install-user-config sk cfg)))
+    (sk-write-file sk :path path :fmt fmt)))
 
 (defun describe-skeleton (skel &optional (stream t))
   "Describe the object SKEL which should inherit from the `skel' superclass."
@@ -52,4 +69,3 @@ return nil. When LOAD is non-nil, load the skelfile if found."
   (let* ((cd (or path (getcwd))))
     (print cd stream)
     (terpri stream)))
-

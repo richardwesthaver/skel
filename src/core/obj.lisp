@@ -113,20 +113,20 @@ via the special form stored in the `ast' slot."))
 (defclass sk-config (skel sk-meta sxp) ())
 
 (defclass sk-user-config (sk-config)
-  ((default-fmt :type symbol)
+  ((fmt :type symbol)
    ;; TODO 2023-09-26: can change type to vc-meta, use as a base
    ;; template for stuff like pre-defined remote URLs.
-   (default-vc :type vc-designator)
-   (default-shed :type string)
-   (default-stash :type string)
-   (default-license :type string)
-   (default-log-level :type log-level-designator)
+   (vc :type vc-designator)
+   (shed :type string)
+   (stash :type string)
+   (license :type string)
+   (log-level :type log-level-designator)
    (user :type form)
    (auto-insert :type form)
    (custom :type form)))
 
 (defstruct sk-snippet ""
-  (name "" :type string) 
+  (name "" :type string)
   (form "" :type form))
 
 (defstruct sk-abbrev ""
@@ -162,6 +162,7 @@ via the special form stored in the `ast' slot."))
    (vc :initarg :vc :initform (make-sk-vc-meta :kind *default-skel-vc-kind*) :type sk-vc-meta :accessor sk-vc)
    (rules :initarg :rules :initform nil :accessor sk-rules :type (or list (vector sk-rule)))
    (documents :initarg :documents :initform nil :accessor sk-documents :type (or list (vector sk-document)))
+   (components :initarg :components :initform nil :accessor sk-components :type list)
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (stash :initarg :stash :initform nil :accessor sk-stash :type (or null pathname))
@@ -237,3 +238,9 @@ via the special form stored in the `ast' slot."))
 	(write-sxp-stream self out :fmt fmt))
     (setf (ast self) nil)))
 
+(defmethod sk-install-user-config ((self sk-project) (cfg sk-user-config))
+  (with-slots (vc shed stash license author) cfg ;; log-level, custom, fmt
+    (when vc (setf (sk-vc self) vc))
+    (when shed (setf (sk-shed self) shed))
+    (when license (setf (sk-license self) license))
+    (when author (setf (sk-author self) author))))

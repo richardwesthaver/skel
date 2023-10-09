@@ -7,6 +7,8 @@
 
 (declaim (type sk-project *skel-project*))
 (defvar *skel-project*)
+(declaim (type sk-user-config *skel-project*))
+(defvar *skel-user-config*)
 
 ;; TODO (defparameter *skel-project-registry* nil)
 ;; TODO (defvar *skelfile-boundary* nil "Set an upper bounds on how
@@ -16,8 +18,9 @@
 (defparameter *default-skel-user* (uid-username (getuid)))
 (defparameter *default-skelfile* "skelfile")
 (defparameter *skelfile-extension* "sk")
+(defparameter *default-skelrc* ".skelrc")
 
 (declaim (type pathname *default-skel-cache* *default-user-skel-config* *default-global-skel-config*))
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "/home/~a/.cache/skel" *default-skel-user*)))
-(defparameter *default-user-skel-config* (make-pathname :name (format nil "/home/~a/.skelrc" *default-skel-user*)))
-(defparameter *default-global-skel-config* (make-pathname :name "/etc/skelrc"))
+(defparameter *default-user-skelrc* (make-pathname :name (format nil "/home/~a/~a" *default-skel-user* *default-skelrc*)))
+(defparameter *default-system-skelrc* (make-pathname :name "/etc/skelrc"))

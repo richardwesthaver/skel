@@ -17,4 +17,4 @@
 (defgeneric sk-writeln (self stream))
 (defgeneric sk-write-string (self))
 (defgeneric sk-write-file (self &key path &allow-other-keys))
-			   
+(defgeneric sk-install-user-config (self cfg))

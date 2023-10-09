@@ -11,8 +11,9 @@
 (defun skc-build ())
 
 (defcmd skc-init
-    (iprintln $args)
-  (apply #'init-skelfile $args))
+    (let ((file (when $args (pop $args)))
+	  (name (when (> $argc 1) (pop $args))))
+      (init-skelfile file name :collapsed)))
 
 (defcmd skc-describe
     (describe 
