@@ -14,13 +14,13 @@
 ;; TODO (defvar *skelfile-boundary* nil "Set an upper bounds on how
 ;; many times and how far to walk an arbitrary file directory.")
 
-(declaim (type string *default-skel-user* *default-skelfile* *skelfile-extension*))
+(declaim (type string *default-skel-user* *default-skelfile* *default-skel-extension*))
 (defparameter *default-skel-user* (uid-username (getuid)))
 (defparameter *default-skelfile* "skelfile")
-(defparameter *skelfile-extension* "sk")
+(defparameter *default-skel-extension* "sk")
 (defparameter *default-skelrc* ".skelrc")
 
-(declaim (type pathname *default-skel-cache* *default-user-skel-config* *default-global-skel-config*))
+(declaim (type pathname *default-skel-cache* *default-user-skelrc* *default-system-skelrc*))
 (defparameter *default-skel-cache* (make-pathname :directory (format nil "/home/~a/.cache/skel" *default-skel-user*)))
 (defparameter *default-user-skelrc* (make-pathname :name (format nil "/home/~a/~a" *default-skel-user* *default-skelrc*)))
 (defparameter *default-system-skelrc* (make-pathname :name "/etc/skelrc"))

@@ -12,7 +12,7 @@ system/. It is specifically for my software stack.
 ** Goals
 - vaporize boilerplate code and docs
 - integrate reasonably well with my tools (Emacs/etc)
-- tree description of projects (nested sexps)
+- object-oriented project management
 ** Resources
 - [[https://www.gnu.org/software/emacs/manual/html_node/autotype/Skeleton-Language.html][skeleton-lanaguage (emacs)]]
 - [[https://github.com/emacs-mirror/emacs/tree/master/lisp/cedet/ede][cedet/ede (emacs)]]
@@ -50,6 +50,7 @@ skel v0.1.1
      -h/--help* :  print this message
      -v/--version* :  print version
      -d/--debug* :  set log level (debug,info,trace,warn)
+     -c/--config* :  set a custom skel user config
      -i/--input  :  input source
      -o/--output  :  output target
   commands:
@@ -57,15 +58,23 @@ skel v0.1.1
     
     init  :  initialize a skelfile in the current directory
      -n/--name  :  project name
-     -k/--kind  :  project kind
     
     describe  :  describe the project skelfile
+     -f/--file  :  path to skelfile
+    
+    inspect  :  describe the project skelfile
      -f/--file  :  path to skelfile
     
     build  :  build artifacts
      -t/--target  :  target artifact to build
     
-    run  
+    make  
+    
+    push  
+    
+    pull  
+    
+    edit  
     
 #+end_example
 
@@ -77,38 +86,71 @@ cat skelfile
 
 #+RESULTS:
 #+begin_src skel
-;;; SKEL @ 2023-09-14.01:47:59 --- A hacker's project compiler -*- mode: skel; -*-
+;;; skel @ 2023-10-08.02:37:25 -*- mode: skel; -*-
 :name skel
+:author "ellis"
 :version "0.1.0"
-:author "Richard Westhaver <ellis@rwest.io>"
-:kind :lisp
-:description "A hacker's project compiler"
+:description "a hacker's project compiler"
 :license "MPL"
-:vc (hg :default "https://lab.rwest.io/ellis/skel"
-	:mirror (git "https://github.com/richardwesthaver/skel"))
-:rules 
-((compile () (compile-system :skel))
- (test ("tests.lisp" compile) (quickload :skel/tests) (compile-file $<) (load-file $<) (do-tests :skel))
- ;; TODO 2023-09-22: shell reader macro -- #!(rm -rf *.fasl)
- (clean () (rm -rf *.fasl))
- (debug (compile) (run-sbcl)))
-;; TODO 2023-09-22: build-wd 
-:scripts 
-((yolo () "a yolo commit" 
-       (hg-ar ./&) (hg-ci -m yolo) (hg-push) (hg-fe))
- (sxpp (file &optional kind) "Return T if FILE is a valid sxp of type KIND"
-       (sxpp kind (read-sxp-file file))))
+:vc :hg
+:tags ("lisp")
+:rules ((build () (asdf:make :skel/cli))
+        (clean () #$ rm -rf */*.fasl $#))
+:documents ((:org "readme"))
+:components 
+((:elisp "sk")
+ (:lisp-system "skel"
+	       :depends-on ("macs" "sxp")
+	       :components
+	       ((:file "src/pkg")
+		(:module "core"
+			 :pathname "src/core"
+			 :depends-on ("src/pkg")
+			 :components
+			 ((:file "err")
+			  (:file "util" :depends-on ("err"))
+			  (:file "cfg" :depends-on ("util"))
+			  (:file "proto" :depends-on ("util"))
+			  (:file "obj" :depends-on ("proto"))
+			  (:file "header" :depends-on ("util"))
+			  (:file "vc" :depends-on ("obj" "header"))
+			  (:file "virt" :depends-on ("obj" "header"))
+			  (:file "mk" :depends-on ("vc"))
+			  (:file "vm" :depends-on ("obj" "virt" "mk"))))
+		(:module "comp" ;; compilers
+			 :pathname "src/comp"
+			 :depends-on ("core")
+			 :components
+			 ((:file "asd")
+			  (:file "containerfile")
+			  (:file "ignore")
+			  (:file "makefile")))
+		(:module "tools" ;; tools
+			 :pathname "src/tools"
+			 :depends-on ("core")
+			 :components
+			 ((:file "deploy")
+			  (:file "viz")))
+		(:module "ext" ;; extensions
+			 :pathname "src/ext"
+			 :depends-on ("core" "comp")
+			 :components
+			 ((:file "asdf")))))
+ (:lisp-system "skel/cli"
+	       :depends-on ("skel" "cli")
+	       :components ((:file "cli")))
+
+ (:lisp-system "skel/tests"
+	       :depends-on ("skel" "rt")
+	       :components ((:file "tests")))
+
+ (:lisp-system "skel/examples"
+	       :depends-on ("skel")
+	       :components ((:file "examples"))))
 :snippets nil
-:documents ("readme.org")
-:stash (:local ".stash" :remote (:hg "https://lab.rwest.io/packy/stash"))
-:shed (:local ".shed" :remote (:hg "https://lab.rwest.io/packy/shed"))
-:abbrevs 
-((isk init-skelfile)
- (dsk describe-skeleton)
- (fsk find-skelfile)
- (lsk load-skelfile)
- (csk compile-skelfile))
-:ast (anything you put in here is ignored)
+:stash nil
+:shed nil
+:abbrevs nil
 #+end_src
 
 This is just a form without the top-level parentheses - you're free to
@@ -119,33 +161,35 @@ The =describe= command can be used to check the currently active
 skelfile, printing any errors and the parsed object.
 
 #+begin_src shell :results output replace :exports both
-  skel describe
+  ./skel describe
 #+end_src
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 3b53-0c04-deb7-2355>
+#<SKEL:SK-PROJECT :ID 02b6-0579-90c5-f293>
   [standard-object]
 
 Slots with :INSTANCE allocation:
-  NAME                           = "dev"
-  PATH                           = "/home/ellis/dev"
-  AUTHOR                         = #<unbound slot>
-  VERSION                        = #<unbound slot>
-  KIND                           = #<unbound slot>
-  DESCRIPTION                    = NIL
-  LICENSE                        = #<unbound slot>
+  NAME                           = SKEL
+  PATH                           = NIL
+  AUTHOR                         = "ellis"
+  VERSION                        = "0.1.0"
+  TAGS                           = ("lisp")
+  DESCRIPTION                    = "a hacker's project compiler"
+  LICENSE                        = "MPL"
   AST                            = NIL
-  ID                             = 4274773686360679253
+  ID                             = 195349653515268755
   VC                             = :HG
-  RULES                          = NIL
-  DOCUMENTS                      = NIL
+  RULES                          = ((BUILD NIL (ASDF/OPERATE:MAKE :SKEL/CLI))..
+  DOCUMENTS                      = ((:ORG "readme"))
+  COMPONENTS                     = ((:ELISP "sk")..
   SCRIPTS                        = NIL
   SNIPPETS                       = NIL
   STASH                          = NIL
   SHED                           = NIL
   ABBREVS                        = NIL
 #+end_example
+
 ** TODO compile
 Skelfiles can be compiled to produce a new project skeleton or update
 an existing one.
@@ -183,79 +227,43 @@ debug:compile;$(LISP) --eval "(start-repl)"
 When you run =skel init= this is the basic skelfile that will be
 generated in the current directory, depending on the following
 contexts:
-
-- cli args
-- user config
+- default user config
 - directory contents
-
-
+- cli args
 With no cli args or user config and an empty directory the output
 looks like this:
-
 #+begin_src skel
-  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
-  (:name "examples"
-   :path "/home/ellis/dev/skel/examples")
+;;; examples @ 2023-10-09.23:38:23 -*- mode: skel; -*-
+:name "examples"
+:vc :hg
 #+end_src
-
-This is the /canonical/ format of a skel form and is the exact
-representation used internally.
-
-You may prefer a less verbose representation for readability and
-hacking. To enable /collapsed/ format, add the following to your
-=.skelrc= file:
-
-#+begin_src skel
-:default-fmt collapsed
-#+end_src
-
-Now when you run =skel init= your =skelfile= will look like this:
-#+begin_src skel
-  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
-  :name "examples"
-  :path "/home/ellis/dev/skel/examples"
-#+end_src
-
-/Whoosh/. no more parens. Well, until you need them rather. The
-collapsed format recursively removes outer parens as long as each
-top-level element is itself a list.
-
-To override your user-config, you can specify cli args like so:
-
-#+begin_src shell
-skel init --vc hg --fmt canonical
-#+end_src
-
-#+begin_src skel
-  ;;; examples @ 2023-09-26.18:15:13 -*- mode: skel; -*-
-  (:name "examples"
-   :path "/home/ellis/dev/skel/examples"
-   :vc (hg :default nil))
-#+end_src
-
-** Lisp
-** Rust
-** Combo
-** Nested
+** Imports
+** Multi
 * Tests
 The unit tests may also be a useful reference:
 
 #+begin_src lisp :results output replace :wrap src lisp :exports both :package :skel.tests
-  (load "tests.lisp")
-  (setq log:*log-level* nil)
+  (ql:quickload :skel/tests)
+  (in-package :skel.tests)
+  (setq *log-level* nil)
   ;; (setq *catch-test-errors* nil)
-  (setq rt:*compile-tests* t)
-  (list (multiple-value-list (rt:do-tests :skel)) (rt:test-results rt:*test-suite*))
+  (setq *compile-tests* t)
+  (list (multiple-value-list (do-tests :skel)) (test-results *test-suite*))
 #+end_src
 
 #+RESULTS:
 #+begin_src lisp
+To load "skel/tests":
+  Load 1 ASDF system:
+    skel/tests
+; Loading "skel/tests"
+
 in suite SKEL with 5/5 tests:
-#<PASS VM-TEST15658> 
-#<PASS MAKEFILE-TEST15657> 
-#<PASS SKELFILE-TEST15656> 
-#<PASS HEADER-COMMENTS-TEST15655> 
-#<PASS SANITY-TEST15654> 
+#<PASS VM-TEST904> 
+#<PASS MAKEFILE-TEST903> 
+#<PASS SKELFILE-TEST902> 
+#<PASS HEADER-COMMENTS-TEST901> 
+#<PASS SANITY-TEST900> 
 No tests failed.
 #+end_src
 

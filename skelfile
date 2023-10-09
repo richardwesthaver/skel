@@ -5,6 +5,7 @@
 :description "a hacker's project compiler"
 :license "MPL"
 :vc :hg
+:tags ("lisp")
 :rules ((build () (asdf:make :skel/cli))
         (clean () #$ rm -rf */*.fasl $#))
 :documents ((:org "readme"))

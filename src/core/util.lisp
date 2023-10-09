@@ -7,7 +7,7 @@
     (if (cdr form)
 	form
 	(car form))))
-    
+
 (defun init-skelrc (&optional file)
   "Initialize a skelrc configuration based on the currently active
 defaults. Defaults to ~/.skelrc."
@@ -15,8 +15,12 @@ defaults. Defaults to ~/.skelrc."
 
 (defun load-skelrc (&optional file)
   "Load a skelrc configuration from FILE. Defaults to ~/.skelrc."
-  (let ((form (file-read-forms file)))
+  (let ((form (file-read-forms (or file *default-user-skelrc* *default-system-skelrc* *default-skelrc*))))
     (load-ast (make-instance 'sk-user-config :ast form :id (sxhash form)))))
+
+(defun init-skel-user-config (&optional file)
+  "Initialize the *SKEL-USER-CONFIG* var."
+  (setq *skel-user-config* (load-skelrc file)))
 
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."

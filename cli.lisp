@@ -2,7 +2,7 @@
 
 ;;; Code:
 (defpackage skel.cli
-  (:use :cl :cond :cli :skel :fmt :log :fu)
+  (:use :cl :cond :cli :skel :fmt :log :fu :readtables)
   (:import-from :sb-posix :getcwd)
   (:export :main))
 
@@ -13,7 +13,7 @@
 (defcmd skc-init
     (let ((file (when $args (pop $args)))
 	  (name (when (> $argc 1) (pop $args))))
-      (init-skelfile file name :collapsed)))
+      (init-skelfile file name)))
 
 (defcmd skc-describe
     (describe 
@@ -34,11 +34,14 @@
   :version "0.1.1"
   :description "A hacker's project compiler and build tool."
   :opts (make-opts 
-	  (:name help :global t :description "print this message" :thunk (lambda (x) (when x (print-help $cli))))
-	  (:name version :global t :description "print version" :thunk (lambda (x) (when x (print-version $cli))))
-	  (:name debug 
-	   :global t :description "set log level (debug,info,trace,warn)"
+	  (:name help :global t :description "print this message" 
+	   :thunk (lambda (x) (when x (print-help $cli))))
+	  (:name version :global t :description "print version" 
+	   :thunk (lambda (x) (when x (print-version $cli))))
+	  (:name debug :global t :description "set log level (debug,info,trace,warn)"
 	   :thunk (lambda (x) (setq *log-level* (if x :debug *log-level*))))
+	  (:name config :global t :description "set a custom skel user config" 
+	   :thunk (lambda (x) (init-skel-user-config (car x)))) ;; :kind?
 	  (:name input :description "input source")
 	  (:name output :description "output target"))
   :cmds (make-cmds
@@ -65,10 +68,12 @@
 	  (:name push)
 	  (:name pull)
 	  (:name edit))
-  (print t))
+  (print-help $cli))
 
 (defun run ()
   (with-cli (opts cmds) $cli
+    (in-readtable *macs-readtable*)
+    ;; should be called from do-cmd
     (loop for o across (active-opts $cli t)
 	  do (do-opt o))
     (debug!

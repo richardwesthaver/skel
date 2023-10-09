@@ -28,7 +28,7 @@
    (path :initarg :path :initform nil :type (or null pathname) :accessor sk-path)
    (author :initarg :author :type string :accessor sk-author)
    (version :initarg :version :type string :accessor sk-version)
-   (kind :initarg :kind :accessor sk-kind)
+   (tags :initarg :tags :accessor sk-tags)
    (description :initarg :description :initform nil :type (or null string) :accessor sk-description)
    (license :initarg :license :type :string :accessor sk-license))
   (:documentation "Skel Meta class."))
@@ -123,7 +123,8 @@ via the special form stored in the `ast' slot."))
    (log-level :type log-level-designator)
    (user :type form)
    (auto-insert :type form)
-   (custom :type form)))
+   (custom :type form))
+  (:documentation "User configuration object, typically written to ~/.skelrc."))
 
 (defstruct sk-snippet ""
   (name "" :type string)

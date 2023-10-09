@@ -46,7 +46,7 @@
    :make-source-header-comment :make-shebang-comment 
    ;; utils
    :init-skelfile :init-skelrc :load-skelrc :find-skelfile :load-skelfile
-   :describe-skeleton :describe-project 
+   :describe-skeleton :describe-project :init-skel-user-config
    ;; vm
    :make-stack-slot :make-sk-vm :sks-ref :sks-pop :sks-push))
 
