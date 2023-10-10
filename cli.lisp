@@ -40,29 +40,29 @@
 	   :thunk (lambda (x) (when x (print-version $cli))))
 	  (:name debug :global t :description "set log level (debug,info,trace,warn)"
 	   :thunk (lambda (x) (setq *log-level* (if x :debug *log-level*))))
-	  (:name config :global t :description "set a custom skel user config" 
+	  (:name config :global t :description "set a custom skel user config" :kind file
 	   :thunk (lambda (x) (init-skel-user-config (car x)))) ;; :kind?
-	  (:name input :description "input source")
-	  (:name output :description "output target"))
+	  (:name input :description "input source" :kind string)
+	  (:name output :description "output target" :kind string))
   :cmds (make-cmds
 	  (:name status
 	   :description "print the status of the current project")
 	  (:name init
 	   :description "initialize a skelfile in the current directory"
 	   :opts (make-opts 
-		   (:name name :description "project name"))
+		   (:name name :description "project name" :kind string))
 	   :thunk skc-init)
 	  (:name describe
 	   :description "describe the project skelfile"
-	   :opts (make-opts (:name file :description "path to skelfile"))
+	   :opts (make-opts (:name file :description "path to skelfile" :kind file))
 	   :thunk skc-describe)
 	  (:name inspect
 	   :description "describe the project skelfile"
-	   :opts (make-opts (:name file :description "path to skelfile"))
+	   :opts (make-opts (:name file :description "path to skelfile" :kind file))
 	   :thunk skc-inspect)
 	  (:name build
 	   :description "build artifacts"
-	   :opts (make-opts (:name target :description "target artifact to build"))
+	   :opts (make-opts (:name target :description "target artifact to build" :kind string))
 	   :thunk skc-build)
 	  (:name make)
 	  (:name push)
