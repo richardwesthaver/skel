@@ -67,11 +67,12 @@
 	  (:name make)
 	  (:name push)
 	  (:name pull)
-	  (:name edit))
-  (print-help $cli))
+	  (:name edit)))
 
 (defun run ()
   (with-cli (opts cmds) $cli
+    (unless (cli-args)
+      (print-help $cli))
     (in-readtable *macs-readtable*)
     ;; should be called from do-cmd
     (loop for o across (active-opts $cli t)
