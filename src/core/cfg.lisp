@@ -7,7 +7,7 @@
 
 (declaim (type sk-project *skel-project*))
 (defvar *skel-project*)
-(declaim (type sk-user-config *skel-project*))
+(declaim (type sk-user-config *skel-user-config*))
 (defvar *skel-user-config*)
 
 ;; TODO (defparameter *skel-project-registry* nil)
@@ -21,6 +21,6 @@
 (defparameter *default-skelrc* ".skelrc")
 
 (declaim (type pathname *default-skel-cache* *default-user-skelrc* *default-system-skelrc*))
-(defparameter *default-skel-cache* (make-pathname :directory (format nil "/home/~a/.cache/skel" *default-skel-user*)))
-(defparameter *default-user-skelrc* (make-pathname :name (format nil "/home/~a/~a" *default-skel-user* *default-skelrc*)))
-(defparameter *default-system-skelrc* (make-pathname :name "/etc/skelrc"))
+(defparameter *default-skel-cache* (pathname (format nil "/home/~a/.cache/skel" *default-skel-user*)))
+(defparameter *default-user-skelrc* (pathname (format nil "/home/~A/~A" *default-skel-user* *default-skelrc*)))
+(defparameter *default-system-skelrc* (pathname "/etc/skelrc"))

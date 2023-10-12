@@ -122,9 +122,22 @@ via the special form stored in the `ast' slot."))
    (license :type string)
    (log-level :type log-level-designator)
    (user :type form)
-   (auto-insert :type form)
-   (custom :type form))
+   (auto-insert :type form))
   (:documentation "User configuration object, typically written to ~/.skelrc."))
+
+;; ast -> obj
+(defmethod load-ast ((self sk-user-config))
+  ;; internal ast is never tagged
+  (with-slots (ast) self
+    (if (formp ast)
+	;; ast is valid, modify object, set ast nil
+	(progn
+	  (sb-int:doplist (k v) ast
+	    (setf (slot-value self (intern (symbol-name k) :skel)) v))
+	  (setf (ast self) nil)
+	  self)
+	;; invalid ast, signal error
+	(error 'skel-syntax-error))))
 
 (defstruct sk-snippet ""
   (name "" :type string)

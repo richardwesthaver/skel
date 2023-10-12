@@ -15,7 +15,7 @@ defaults. Defaults to ~/.skelrc."
 
 (defun load-skelrc (&optional file)
   "Load a skelrc configuration from FILE. Defaults to ~/.skelrc."
-  (let ((form (file-read-forms (or file *default-user-skelrc* *default-system-skelrc* *default-skelrc*))))
+  (let ((form (file-read-forms (or file *default-user-skelrc*))))
     (load-ast (make-instance 'sk-user-config :ast form :id (sxhash form)))))
 
 (defun init-skel-user-config (&optional file)
@@ -56,7 +56,8 @@ return nil. When LOAD is non-nil, load the skelfile if found."
 
 (defun init-skelfile (&optional file name cfg)
   "Initialize a skelfile."
-  (let ((sk (make-instance 'sk-project :name (or name (pathname-name (getcwd)))))
+  (let ((sk (make-instance 'sk-project 
+			   :name (or name (pathname-name (getcwd)))))
 	(path (or file *default-skelfile*))
 	(fmt :collapsed))
     (when cfg (setf sk (sk-install-user-config sk cfg)))

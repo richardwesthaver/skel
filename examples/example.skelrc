@@ -1,0 +1,9 @@
+;;; ellis @ 2023-10-12.02:58:08 -*- mode: skel; -*-
+:name "ellis"
+:fmt :collapsed
+:vc :hg
+:auto-insert t
+:license "MPL"
+:log-level nil
+:shed "~/lab/shed"
+:stash "~/lab/stash"

@@ -53,6 +53,10 @@ the appropriate restarts."
     (is (load-skelfile %tmp))
     (is (build-ast (sk-read-file (make-instance 'sk-project) :path %tmp)))))
 
+(deftest skelrc ()
+  "Ensure skelrc files are created and loaded correctly."
+  (do-tmp-path (tmp-path "skrc")))
+
 (deftest makefile ()
   "Make sure makefiles are making out ok."
     (do-tmp-path (tmp-path "mk")
