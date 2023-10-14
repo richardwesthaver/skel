@@ -64,16 +64,6 @@
 
 ;;  HACK 2023-09-27: (defstruct sk-url) ?
 
-(defclass sk-target (skel)
-  ((path :initform "" :initarg :path :type string :accessor sk-path)))
-
-(defmethod sk-write ((self sk-target) stream)
-  (if (stringp (sk-path self)) (format stream "~A" (sk-path self))))
-
-(defmethod sk-write-string ((self sk-target))
-  (with-output-to-string (s)
-    (sk-write self s)))
-
 (defclass sk-source (skel)
   ((path :initform "" :initarg :path :type string :accessor sk-path)))
 
@@ -85,16 +75,19 @@
     (sk-write self s)))
 
 (defclass sk-rule (skel)
-  ;; if target is a string, treated as a PHONY.
-  ((target :initarg :target :type (or sk-target string) :accessor sk-rule-target)
-   (source :initform nil :initarg :source :type (or sk-source null) :accessor sk-rule-source)
-   (recipe :initarg :recipe :type sk-command :accessor sk-rule-recipe))
-  (:documentation "Skel rules. Maps a `sk-source' to a corresponding `sk-target'
-via the special form stored in the `ast' slot."))
+  ;; if target is a symbol, treated as a PHONY.
+  ((target :initarg :target :type (or string symbol) :accessor sk-rule-target)
+   (source :initarg :source :type (or sk-source null) :accessor sk-rule-source)
+   (recipe :initform (make-instance 'sk-command) :initarg :recipe :type sk-command :accessor sk-rule-recipe))
+  (:documentation "Skel rules. Maps a SOURCE to a corresponding TARGET
+via the special form stored in RECIPE."))
+
+(defmethod write-sxp-stream ((self sk-rule) stream &key (pretty t) (case :downcase) &allow-other-keys)
+  (write `(,(sk-rule-target self) ,(sk-rule-source self) ,@(sk-body (sk-rule-recipe self))) :stream stream :pretty pretty :case case :readably t :array t :escape t))
 
 (defmacro make-sk-rule (target source &body recipe)
   "Make a new SK-RULE."
-  `(let ((r (make-instance 'sk-command :body ,@recipe)))
+  `(let ((r (make-instance 'sk-command :body ,recipe)))
      (make-instance 'sk-rule :target ,target :source ,source :recipe r)))
 
 (defmethod sk-write ((self sk-rule) stream)
@@ -103,16 +96,24 @@ via the special form stored in the `ast' slot."))
     (sk-write-string source)
     (sk-write-string recipe)))
 
+(deftype document-designator () '(member :org :txt :pdf :html :md))
 
+;; TODO 2023-10-13: integrate organ for working with org document
+;; types - mixins and such
 (defclass sk-document (skel sk-meta sxp)
-  ())
+  ((kind :initarg :kind :type document-designator)
+   (export :initarg :setup :type form
+	   :documentation "document export options")
+   (attach :initarg :attach :type form
+	   :documentation "document attachments"))
+  (:documentation "Document object."))
 
 (defclass sk-script (skel sk-meta sxp)
   ())
 
-(defclass sk-config (skel sk-meta sxp) ())
+(defclass sk-config (skel sxp) nil)
 
-(defclass sk-user-config (sk-config)
+(defclass sk-user-config (sk-config sk-meta)
   ((fmt :type symbol)
    ;; TODO 2023-09-26: can change type to vc-meta, use as a base
    ;; template for stuff like pre-defined remote URLs.
@@ -141,25 +142,24 @@ via the special form stored in the `ast' slot."))
 	;; invalid ast, signal error
 	(error 'skel-syntax-error))))
 
-(defstruct sk-snippet ""
+(defstruct sk-snippet
   (name "" :type string)
   (form "" :type form))
 
-(defstruct sk-abbrev ""
+(defstruct sk-abbrev
   (match nil :type form) 
   (expansion nil :type form))
 
-(defstruct sk-vc-remote-meta ""
-	   (name :default :type keyword)
-	   (path nil :type (or symbol string)))
+(defstruct sk-vc-remote-meta
+  (name :default :type keyword)
+  (path nil :type (or symbol string)))
 
-(defmethod write-sxp-stream ((self sk-vc-remote-meta) stream &key (pretty t) (case :downcase) (fmt :collapsed))
-  (declare (ignore fmt))
+(defmethod write-sxp-stream ((self sk-vc-remote-meta) stream &key (pretty t) (case :downcase) &allow-other-keys)
   (write `(,(sk-vc-remote-meta-name self) ,(sk-vc-remote-meta-path self)) :stream stream :pretty pretty :case case :readably t :array t :escape t))
 
-(defstruct sk-vc-meta ""
-	   (kind *default-skel-vc-kind* :type vc-designator)
-	   (remotes nil :type list))
+(defstruct sk-vc-meta 
+  (kind *default-skel-vc-kind* :type vc-designator)
+  (remotes nil :type list))
 
 (defmethod write-sxp-stream ((self sk-vc-meta) stream &key (pretty t) (case :downcase) (fmt :collapsed))
   (if (= 0 (length (sk-vc-meta-remotes self)))

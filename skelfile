@@ -6,8 +6,8 @@
 :license "MPL"
 :vc :hg
 :tags ("lisp")
-:rules ((build () (asdf:make :skel/cli))
-        (clean () #$ rm -rf */*.fasl $#))
+:rules ((build () (print (asdf:make :skel/cli)))
+        (clean () #$rm -rf */*.fasl$#))
 :documents ((:org "readme"))
 :components 
 ((:elisp "sk")

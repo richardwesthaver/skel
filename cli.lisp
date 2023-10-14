@@ -59,16 +59,14 @@
       (sk-vc
        (find-skelfile
 	(if $args (pathname (car $args))
-	    (cli-cwd $cli))
+	    #P".")
 	:load t))
     (:hg (run-hg-command "push"))))
 
 (defcmd skc-make
-  (princ
-   (sk-rules
-    (find-skelfile
-     (cli-cwd $cli)
-     :load t))))
+  (if $args
+      (debug! (sk-rules (find-skelfile (car $args) :load t)))
+      (sk-rules (find-skelfile #P"." :load t))))
 
 (define-cli $cli
   :name "skel"
@@ -122,12 +120,12 @@
 (defun run ()
   (let ((*log-level* nil)
 	(*skel-user-config* (init-skel-user-config)))
-  (in-readtable *macs-readtable*) ;; should be in sxp
-  (with-cli () $cli
-    (do-cmd $cli)
-    (debug-opts $cli)
-    (debug! "loaded skelrc:" *skel-user-config*)
-    (dbg! *skel-user-config*))))
+    (in-readtable *macs-readtable*) ;; should be in sxp
+    (with-cli () $cli
+      (do-cmd $cli)
+      (debug-opts $cli)
+      (debug! "loaded skelrc:" *skel-user-config*)
+      (dbg! *skel-user-config*))))
 
 (defmain ()
   (run)
