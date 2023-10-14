@@ -21,7 +21,7 @@
 ;;; Code:
 (in-package :skel)
 
-(defpackage :skel.make
+(defpackage :skel.comp.make
   (:use :cl :skel :fmt :sxp)
   (:export 
    :*default-makefile* :*makefile-extension* 
@@ -30,7 +30,7 @@
    :mk-val :mk-var
    :makefile :push-rule :push-directive :push-var))
 
-(in-package :skel.make)
+(in-package :skel.comp.make)
 
 (defparameter *default-makefile* "makefile")
 (defparameter *makefile-extension* "mk")
@@ -109,6 +109,4 @@
 		   out))
     (sk-compile self out)))
 
-(defmethod sk-read-file ((self makefile) &key (path *default-makefile*))
-  (declare (ignore path)))
- 
+(defmethod sk-read-file ((self makefile) path))

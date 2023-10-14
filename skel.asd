@@ -6,7 +6,7 @@
   :version "0.1.0"
   :maintainer "ellis <ellis@rwest.io>"
   :bug-tracker "https://lab.rwest.io/ellis/skel/issues"
-  :depends-on (:uiop :sb-posix :sb-bsd-sockets :macs :sxp :organ)
+  :depends-on (:uiop :sb-posix :sb-bsd-sockets :macs :sxp :organ :cl-ppcre)
   :in-order-to ((test-op (test-op skel/tests)))
   :components ((:file "src/pkg")
 	       (:module "core"

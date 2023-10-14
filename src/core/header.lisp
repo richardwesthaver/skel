@@ -36,3 +36,20 @@
 (defun make-shebang-comment (shell &rest args)
   "Generate a shebang file-header line."
   (format nil "#~A ~{~A~^ ~}~%" shell args))
+
+(defun parse-stream-file-header (stream)
+  "Parse a file-header from STREAM."
+  (when-let ((l (read-line stream :eof-error-p nil)))
+    l))
+
+(defun parse-source-file-header (file)
+  "Return a FILE-HEADER based on the first line of FILE."
+  (with-open-file (f file)
+    (make-file-header :source (parse-stream-file-header f))))
+
+(defun extract-source-file-header (str)
+  "Extract a FILE-HEADER from STR, returning two values: the extracted object, and the modified string."
+  (with-input-from-string (s str)
+    (values
+     (make-file-header :source (parse-stream-file-header s))
+     str)))

@@ -122,6 +122,8 @@ via the special form stored in the `ast' slot."))
    (license :type string)
    (log-level :type log-level-designator)
    (user :type form)
+   (alias-list :type form
+	       :documentation "alist of aliases. currently used as a special cli-opt-parser by the skel binary.")
    (auto-insert :type form))
   (:documentation "User configuration object, typically written to ~/.skelrc."))
 
@@ -224,16 +226,23 @@ via the special form stored in the `ast' slot."))
 	 (error 'sxp-fmt-error)))
     (t (write (ast self) :stream stream :pretty pretty :case case :readably t :array t :escape t))))
 
+(declaim (inline file-read-forms))
+(defun file-read-forms (file)
+  (let ((form (read-file-forms file)))
+    (if (cdr form)
+	form
+	(car form))))
+
 ;; file -> ast
-;; allow-comment?
-(defmethod sk-read-file ((self sk-project) &key (path *default-skelfile*))
-  (wrap self (read-file-forms path))
+(defmethod sk-read-file ((self sk-project) path)
+  (wrap self (file-read-forms path))
+  (setf (sk-path self) (ensure-absolute-pathname path *default-pathname-defaults*))
   self)
 
 ;; ast -> file
 (defmethod sk-write-file ((self sk-project) 
 			  &key 
-			    (path *default-skelfile*) (nullp nil) (comment t) (fmt :canonical)
+			    (path *default-skelfile*) (nullp nil) (header t) (fmt :canonical)
 			    (if-exists :error))
     (build-ast self :nullp nullp)
   (prog1 
@@ -241,7 +250,7 @@ via the special form stored in the `ast' slot."))
 			   :direction :output
 			   :if-exists if-exists
 			   :if-does-not-exist :create)
-	(when comment (princ
+	(when header (princ
 		       (make-source-header-comment
 			(sk-name self)
 			:cchar #\;
@@ -253,7 +262,7 @@ via the special form stored in the `ast' slot."))
     (setf (ast self) nil)))
 
 (defmethod sk-install-user-config ((self sk-project) (cfg sk-user-config))
-  (with-slots (vc shed stash license author) cfg ;; log-level, custom, fmt
+  (with-slots (vc shed stash license author) (debug! cfg) ;; log-level, custom, fmt
     (when vc (setf (sk-vc self) vc))
     (when shed (setf (sk-shed self) shed))
     (when license (setf (sk-license self) license))

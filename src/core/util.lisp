@@ -1,13 +1,6 @@
 ;;; Utils
 (in-package :skel)
 
-(declaim (inline file-read-forms))
-(defun file-read-forms (file)
-  (let ((form (read-file-forms file)))
-    (if (cdr form)
-	form
-	(car form))))
-
 (defun init-skelrc (&optional file)
   "Initialize a skelrc configuration based on the currently active
 defaults. Defaults to ~/.skelrc."
@@ -24,8 +17,7 @@ defaults. Defaults to ~/.skelrc."
 
 (defun load-skelfile (file)
   "Load the 'skelfile' FILE."
-  (let ((form (file-read-forms file)))
-    (load-ast (make-instance 'sk-project :ast form :id (sxhash form)))))
+  (load-ast (sk-read-file (make-instance 'sk-project) file)))
 
 (defun find-skelfile (start &key (load nil) (name *default-skelfile*) (walk t))
   "Walk up the current directory returning the path to a 'skelfile', else

@@ -42,7 +42,10 @@
 (defpackage :skel.vc
   (:use :sb-bsd-sockets :cl :skel)
   (:import-from :sb-posix :getcwd)
+  (:import-from :sb-ext :run-program)
   (:export
+   :*hg-program* :*git-program*
+   :run-hg-command :run-git-command
    :repo :hg-repo :git-repo
    :vc-meta :hg-meta :git-meta
    :hg-client :make-hg-client))
@@ -83,6 +86,9 @@
 
 (defvar *default-hg-client-buffer-size* 4096)
 
+(defvar *hg-program* #P"/usr/bin/hg")
+(defvar *git-program* #P"/usr/bin/git")
+
 (declaim (inline %make-hg-client))
 (defstruct (hg-client (:constructor %make-hg-client))
   "hg-client structures contain the client connection state
@@ -101,6 +107,12 @@
 		       :element-type 'unsigned-byte
 		       :adjustable nil)))
 
+(defun run-hg-command (cmd &rest args)
+  (run-program *hg-program* (push cmd args)))
+
 ;;; Git
+(defun run-git-command (cmd &rest args)
+  (run-program *git-program* (push cmd args)))
+
 (defclass git-repo (repo)
   ((index))) ;; working-directory

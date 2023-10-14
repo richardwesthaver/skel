@@ -12,7 +12,7 @@
 (defgeneric rehash-object (self))
 (defgeneric sk-transform (self other &key &allow-other-keys))
 ;; TODO 2023-09-22: consider a skelfile-writer struct
-(defgeneric sk-read-file (self &key path &allow-other-keys))
+(defgeneric sk-read-file (self path))
 (defgeneric sk-write (self stream))
 (defgeneric sk-writeln (self stream))
 (defgeneric sk-write-string (self))

@@ -3,19 +3,23 @@
 ;; $args, $argv $cli $opt
 ;;; Code:
 (defpackage skel.cli
-  (:use :cl :cond :cli :skel :fmt :log :fu :readtables)
+  (:use :cl :cond :cli :skel :fmt :log :fu :readtables :skel.vc :skel.virt :skel.comp.make)
   (:import-from :sb-posix :getcwd)
   (:import-from :uiop :println)
   (:export :main))
 
 (in-package :skel.cli)
 
-(defun skc-build ())
-
 (defvar skc-file-prompt-history '(""))
 (make-prompt! skc-file "file")
 (defvar skc-name-prompt-history '(""))
 (make-prompt! skc-name "name")
+
+(defopt skc-help (print-help $cli))
+(defopt skc-version (print-version $cli))
+(defopt skc-debug (setq *log-level* (if $val :debug nil)))
+;; TODO 2023-10-13: almost there
+(defopt skc-config (init-skel-user-config (parse-file-opt $val)))
 
 (defcmd skc-init
     (let ((file (when $args (pop $args)))
@@ -25,7 +29,8 @@
 	     #'(lambda (s)
 		 (println (format nil "file already exists: ~A" (or file *default-skelfile*)))
 		 (let ((f2 (skc-file-prompt)))
-		   (if (string= f2 "") (error s)
+		   (if (string= f2 "") 
+		       (error s)
 		       (use-value f2 s))))))
 	(init-skelfile file name))))
 
@@ -40,37 +45,51 @@
     (inspect
      (find-skelfile
       (if $args (pathname (car $args))
-	  (cli-cwd $cli))
+	  #P".")
       :load t)))
 
 (defcmd skc-show
     (find-skelfile
      (if $args (pathname (car $args))
-	 (cli-cwd $cli))
-     :load t)
-  (terpri))
+	 #P".")
+     :load t))
+
+(defcmd skc-push
+  (case
+      (sk-vc
+       (find-skelfile
+	(if $args (pathname (car $args))
+	    (cli-cwd $cli))
+	:load t))
+    (:hg (run-hg-command "push"))))
+
+(defcmd skc-make
+  (princ
+   (sk-rules
+    (find-skelfile
+     (cli-cwd $cli)
+     :load t))))
 
 (define-cli $cli
   :name "skel"
   :version "0.1.1"
   :description "A hacker's project compiler and build tool."
-  :thunk skc-show
+  :thunk skc-describe
   :opts (make-opts 
 	  (:name help :global t :description "print this message" 
-	   :thunk (lambda (x) (when x (print-help $cli))))
+	   :thunk skc-help)
 	  (:name version :global t :description "print version" 
-	   :thunk (lambda (x) (when x (print-version $cli))))
+	   :thunk skc-version)
 	  (:name debug :global t :description "set log level (debug,info,trace,warn)"
-	   :thunk (lambda (x) (setq *log-level* (if x :debug *log-level*))))
+	   :thunk skc-debug)
 	  (:name config :global t :description "set a custom skel user config" :kind file
-	   :thunk (lambda (x) (init-skel-user-config (car x)))) ;; :kind?
+	   :thunk skc-config) ;; :kind?
 	  (:name input :description "input source" :kind string)
 	  (:name output :description "output target" :kind string))
   :cmds (make-cmds
 	  (:name init
 	   :description "initialize a skelfile in the current directory"
-	   :opts (make-opts 
-		   (:name name :description "project name" :kind string))
+	   :opts (make-opts (:name name :description "project name" :kind string))
 	   :thunk skc-init)
 	  (:name show
 	   :description "describe the project skelfile"
@@ -80,14 +99,15 @@
 	   :description "inspect the project skelfile"
 	   :opts (make-opts (:name file :description "path to skelfile" :kind file))
 	   :thunk skc-inspect)
-	  (:name build
+	  (:name make
 	   :description "build project targets"
 	   :opts (make-opts (:name target :description "target to build" :kind string))
-	   :thunk skc-build)
+	   :thunk skc-make)
 	  (:name run
 	   :description "run a script or command")
 	  (:name push
-	   :description "push the current project upstream")
+	   :description "push the current project upstream"
+	   :thunk skc-push)
 	  (:name pull
 	   :description "pull the current project from remote")
 	  (:name clone
@@ -95,17 +115,19 @@
 	  (:name commit
 	   :description "commit changes to the project vc")
 	  (:name edit
-	   :description "edit a project file")))
+	   :description "edit a project file")
+	  (:name shell
+		 :description "open the sk-shell interpreter")))
 
 (defun run ()
+  (let ((*log-level* nil)
+	(*skel-user-config* (init-skel-user-config)))
   (in-readtable *macs-readtable*) ;; should be in sxp
-  ;; KLUDGE 2023-10-11: overwritten when --cfg is used
-  (unless (boundp '*skel-user-config*)
-    (init-skel-user-config))
   (with-cli () $cli
     (do-cmd $cli)
     (debug-opts $cli)
-    (debug! "loaded skelrc:" *skel-user-config*)))
+    (debug! "loaded skelrc:" *skel-user-config*)
+    (dbg! *skel-user-config*))))
 
 (defmain ()
   (run)
