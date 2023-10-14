@@ -111,22 +111,26 @@ via the special form stored in RECIPE."))
 (defclass sk-script (skel sk-meta sxp)
   ())
 
-(defclass sk-config (skel sxp) nil)
+(defclass sk-config (skel sxp) 
+  ((imports :type list)))
 
 (defclass sk-user-config (sk-config sk-meta)
   ((fmt :type symbol)
    ;; TODO 2023-09-26: can change type to vc-meta, use as a base
    ;; template for stuff like pre-defined remote URLs.
-   (vc :type vc-designator)
-   (shed :type string)
-   (stash :type string)
-   (license :type string)
+   (vc :type vc-designator :accessor sk-vc)
+   (shed :type pathname :accessor sk-shed)
+   (stash :type pathname :accessor sk-stash)
+   (scripts :type (or pathname list) :accessor sk-scripts)
+   (license :type string :accessor sk-license)
    (log-level :type log-level-designator)
-   (user :type form)
-   (alias-list :type form
+   (user :type form :accessor sk-user)
+   (alias-list :type (or list vector)
 	       :documentation "alist of aliases. currently used as a special cli-opt-parser by the skel binary.")
    (auto-insert :type form))
   (:documentation "User configuration object, typically written to ~/.skelrc."))
+
+(defun bound-string-p (o s) (and (slot-boundp o s) (stringp (slot-value o s))))
 
 ;; ast -> obj
 (defmethod load-ast ((self sk-user-config))
@@ -137,6 +141,11 @@ via the special form stored in RECIPE."))
 	(progn
 	  (sb-int:doplist (k v) ast
 	    (setf (slot-value self (intern (symbol-name k) :skel)) v))
+	  (when (bound-string-p self 'stash) (setf (sk-stash self) (pathname (sk-stash self))))
+	  (when (bound-string-p self 'shed) (setf (sk-shed self) (pathname (sk-shed self))))
+	  (when (bound-string-p self 'scripts) (setf (sk-scripts self)
+					       ;; TODO 2023-10-14: convert into list of script names
+					       (pathname (sk-scripts self))))
 	  (setf (ast self) nil)
 	  self)
 	;; invalid ast, signal error
@@ -183,7 +192,8 @@ via the special form stored in RECIPE."))
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
    (stash :initarg :stash :accessor sk-stash :type pathname)
    (shed :initarg :shed :accessor sk-shed :type pathname)
-   (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
+   (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))
+   (imports :initarg :imports :initform nil :accessor sk-imports :type (or list (vector pathname)))))
 
 ;; ast -> obj
 (defmethod load-ast ((self sk-project))
@@ -194,8 +204,11 @@ via the special form stored in RECIPE."))
 	(progn
 	  (sb-int:doplist (k v) ast
 	    (setf (slot-value self (intern (symbol-name k) :skel)) v))
-	  (when (stringp (sk-stash self)) (setf (sk-stash self) (pathname (sk-stash self))))
-	  (when (stringp (sk-shed self)) (setf (sk-shed self) (pathname (sk-shed self))))
+	  (when (bound-string-p self 'stash) (setf (sk-stash self) (pathname (sk-stash self))))
+	  (when (bound-string-p self 'shed) (setf (sk-shed self) (pathname (sk-shed self))))
+	  (when (bound-string-p self 'scripts) (setf (sk-scripts self)
+					       ;; TODO 2023-10-14: convert into list of script names
+					       (pathname (sk-scripts self))))
 	  (setf (ast self) nil)
 	  self)
 	;; invalid ast, signal error

@@ -141,8 +141,8 @@ cat skelfile
 			 :components
 			 ((:file "asdf")))))
  (:lisp-system "skel/cli"
-	       :depends-on ("skel" "cli")
-	       :components ((:file "cli")))
+	       :depends-on ("skel" "macs" "cli")
+	       :components ((:file "src/cli")))
 
  (:lisp-system "skel/tests"
 	       :depends-on ("skel" "rt")
@@ -170,7 +170,7 @@ skelfile, printing any errors and the parsed object.
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 0899-18ed-8f6b-3784>
+#<SKEL:SK-PROJECT :ID 1e61-38b1-c5fe-7eac>
   [standard-object]
 
 Slots with :INSTANCE allocation:
@@ -182,7 +182,7 @@ Slots with :INSTANCE allocation:
   DESCRIPTION                    = "a hacker's project compiler"
   LICENSE                        = "MPL"
   AST                            = NIL
-  ID                             = 619553832332638084
+  ID                             = 2189093230060928684
   VC                             = :HG
   RULES                          = ((BUILD NIL (PRINT (ASDF/OPERATE:MAKE :SKEL/CLI)))..
   DOCUMENTS                      = ((:ORG "readme"))
@@ -192,6 +192,7 @@ Slots with :INSTANCE allocation:
   STASH                          = #P"~/stash"
   SHED                           = #P"~/shed"
   ABBREVS                        = NIL
+  IMPORTS                        = NIL
 #+end_example
 
 ** TODO compile
@@ -239,7 +240,6 @@ looks like this:
 #+begin_src skel
 ;;; examples @ 2023-10-09.23:38:23 -*- mode: skel; -*-
 :name "examples"
-:vc :hg
 #+end_src
 ** Imports
 ** Multi

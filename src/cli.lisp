@@ -68,7 +68,7 @@
 (defcmd skc-make
   (if $args
       (debug! (sk-rules (find-skelfile (car $args) :load t)))
-      (sk-rules (find-skelfile #P"." :load t))))
+      (debug! (sk-rules (find-skelfile #P"." :load t)))))
 
 (define-cli $cli
   :name "skel"
@@ -126,7 +126,6 @@
     (with-cli () $cli
       (do-cmd $cli)
       (debug-opts $cli)
-      (debug! "loaded skelrc:" *skel-user-config*)
       (dbg! *skel-user-config*))))
 
 (defmain ()
