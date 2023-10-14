@@ -49,8 +49,8 @@
 			 :components
 			 ((:file "asdf")))))
  (:lisp-system "skel/cli"
-	       :depends-on ("skel" "cli")
-	       :components ((:file "cli")))
+	       :depends-on ("skel" "macs" "cli")
+	       :components ((:file "src/cli")))
 
  (:lisp-system "skel/tests"
 	       :depends-on ("skel" "rt")

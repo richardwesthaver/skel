@@ -6,7 +6,7 @@
   :version "0.1.0"
   :maintainer "ellis <ellis@rwest.io>"
   :bug-tracker "https://lab.rwest.io/ellis/skel/issues"
-  :depends-on (:uiop :sb-posix :sb-bsd-sockets :macs :sxp :organ :cl-ppcre)
+  :depends-on (:uiop :asdf :sb-posix :sb-bsd-sockets :sb-concurrency :macs :sxp :organ :cl-ppcre :rt :pkg)
   :in-order-to ((test-op (test-op skel/tests)))
   :components ((:file "src/pkg")
 	       (:module "core"
@@ -50,7 +50,7 @@
   :build-pathname "skel"
   :entry-point "skel.cli:main"
   :perform (test-op (test-op skel/tests))
-  :components ((:file "cli")))
+  :components ((:file "src/cli")))
 
 (defsystem "skel/tests"
   :depends-on (:skel :macs :rt :sxp)

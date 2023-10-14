@@ -5,9 +5,10 @@
 ;;; Commentary:
 
 ;;; Code:
-(eval-when (:compile-toplevel :load-toplevel :execute) (require 'sb-posix))
+(eval-when (:compile-toplevel :load-toplevel :execute) 
+  (require 'sb-posix))
 
-(defpackage skel
+(pkg:defpkg :skel
   (:use :cl :sxp :cond :fu :fmt :sb-mop :log :list :ppcre)
   (:import-from :sb-posix :getcwd :getuid)
   (:import-from :sb-unix :uid-username)
@@ -54,3 +55,5 @@
    :make-stack-slot :make-sk-vm :sks-ref :sks-pop :sks-push))
 
 (in-package :skel)
+(defvar *skel-version* "0.1.0")
+(provide :skel)

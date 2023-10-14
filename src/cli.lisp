@@ -2,14 +2,16 @@
 
 ;; $args, $argv $cli $opt
 ;;; Code:
-(defpackage skel.cli
-  (:use :cl :cond :cli :skel :fmt :log :fu :readtables :skel.vc :skel.virt :skel.comp.make)
+(pkg:defpkg :skel.cli
+    (:use :cl :cond :cli :skel :fmt :log :fu :readtables :skel.vc :skel.virt :skel.comp.make)
   (:import-from :sb-posix :getcwd)
   (:import-from :uiop :println)
   (:export :main))
 
 (in-package :skel.cli)
 
+;; HACK 2023-10-14: a bit too early to implement this, would rather
+;; use the repl. they're useful for linking up with the debugger tho.
 (defvar skc-file-prompt-history '(""))
 (make-prompt! skc-file "file")
 (defvar skc-name-prompt-history '(""))
@@ -115,7 +117,7 @@
 	  (:name edit
 	   :description "edit a project file")
 	  (:name shell
-		 :description "open the sk-shell interpreter")))
+	   :description "open the sk-shell interpreter")))
 
 (defun run ()
   (let ((*log-level* nil)
