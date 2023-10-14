@@ -20,7 +20,16 @@
 (defparameter *default-skel-extension* "sk")
 (defparameter *default-skelrc* ".skelrc")
 
-(declaim (type pathname *default-skel-cache* *default-user-skelrc* *default-system-skelrc*))
-(defparameter *default-skel-cache* (pathname (format nil "/home/~a/.cache/skel" *default-skel-user*)))
+(declaim (type pathname *default-skel-stash* *default-skel-shed*
+	       *default-skel-cache* *default-user-skelrc* *default-system-skelrc*))
+	       
+
+(defparameter *default-skel-stash* (pathname (format nil "/home/~a/stash/" *default-skel-user*)))
+
+(defparameter *default-skel-shed* (pathname (format nil "/home/~a/shed/" *default-skel-user*)))
+
+(defparameter *default-skel-cache* (pathname (format nil "/home/~a/.cache/skel/" *default-skel-user*)))
+
 (defparameter *default-user-skelrc* (pathname (format nil "/home/~A/~A" *default-skel-user* *default-skelrc*)))
+
 (defparameter *default-system-skelrc* (pathname "/etc/skelrc"))

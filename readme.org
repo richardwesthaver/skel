@@ -63,7 +63,7 @@ skel v0.1.1
     inspect  :  inspect the project skelfile
      -f/--file  :  path to skelfile
     
-    build  :  build project targets
+    make  :  build project targets
      -t/--target  :  target to build
     
     run  :  run a script or command
@@ -78,6 +78,8 @@ skel v0.1.1
     
     edit  :  edit a project file
     
+    shell  :  open the sk-shell interpreter
+    
 #+end_example
 
 Here's skel's skelfile:
@@ -88,7 +90,7 @@ cat skelfile
 
 #+RESULTS:
 #+begin_src skel
-;;; skel @ 2023-10-08.02:37:25 -*- mode: skel; -*-
+;;; skelfile @ 2023-10-08.02:37:25 -*- mode: skel; -*-
 :name skel
 :author "ellis"
 :version "0.1.0"
@@ -96,8 +98,8 @@ cat skelfile
 :license "MPL"
 :vc :hg
 :tags ("lisp")
-:rules ((build () (asdf:make :skel/cli))
-        (clean () #$ rm -rf */*.fasl $#))
+:rules ((build () (print (asdf:make :skel/cli)))
+        (clean () #$rm -rf */*.fasl$#))
 :documents ((:org "readme"))
 :components 
 ((:elisp "sk")
@@ -149,10 +151,10 @@ cat skelfile
  (:lisp-system "skel/examples"
 	       :depends-on ("skel")
 	       :components ((:file "examples"))))
-:snippets nil
-:stash nil
-:shed nil
+:stash "~/stash"
+:shed "~/shed"
 :abbrevs nil
+:snippets ((autogen #$sbcl --eval '(asdf:make :skel/cli)'$#))
 #+end_src
 
 This is just a form without the top-level parentheses - you're free to
@@ -168,27 +170,27 @@ skelfile, printing any errors and the parsed object.
 
 #+RESULTS:
 #+begin_example
-#<SKEL:SK-PROJECT :ID 02b6-0579-90c5-f293>
+#<SKEL:SK-PROJECT :ID 0899-18ed-8f6b-3784>
   [standard-object]
 
 Slots with :INSTANCE allocation:
   NAME                           = SKEL
-  PATH                           = NIL
+  PATH                           = #P"/home/ellis/dev/skel/skelfile"
   AUTHOR                         = "ellis"
   VERSION                        = "0.1.0"
   TAGS                           = ("lisp")
   DESCRIPTION                    = "a hacker's project compiler"
   LICENSE                        = "MPL"
   AST                            = NIL
-  ID                             = 195349653515268755
+  ID                             = 619553832332638084
   VC                             = :HG
-  RULES                          = ((BUILD NIL (ASDF/OPERATE:MAKE :SKEL/CLI))..
+  RULES                          = ((BUILD NIL (PRINT (ASDF/OPERATE:MAKE :SKEL/CLI)))..
   DOCUMENTS                      = ((:ORG "readme"))
   COMPONENTS                     = ((:ELISP "sk")..
   SCRIPTS                        = NIL
-  SNIPPETS                       = NIL
-  STASH                          = NIL
-  SHED                           = NIL
+  SNIPPETS                       = ((AUTOGEN "sbcl --eval '(asdf:make :skel/cli)'"))
+  STASH                          = #P"~/stash"
+  SHED                           = #P"~/shed"
   ABBREVS                        = NIL
 #+end_example
 

@@ -181,8 +181,8 @@ via the special form stored in RECIPE."))
    (components :initarg :components :initform nil :accessor sk-components :type list)
    (scripts :initarg :scripts :initform nil :accessor sk-scripts :type (or list (vector sk-script)))
    (snippets :initarg :snippets :initform nil :accessor sk-snippets :type (or list (vector sk-snippet)))
-   (stash :initarg :stash :initform nil :accessor sk-stash :type (or null pathname))
-   (shed :initarg :shed :initform nil :accessor sk-shed :type (or null pathname))
+   (stash :initarg :stash :accessor sk-stash :type pathname)
+   (shed :initarg :shed :accessor sk-shed :type pathname)
    (abbrevs :initarg :abbrevs :initform nil :accessor sk-abbrevs :type (or list (vector sk-abbrevs)))))
 
 ;; ast -> obj
@@ -194,6 +194,8 @@ via the special form stored in RECIPE."))
 	(progn
 	  (sb-int:doplist (k v) ast
 	    (setf (slot-value self (intern (symbol-name k) :skel)) v))
+	  (when (stringp (sk-stash self)) (setf (sk-stash self) (pathname (sk-stash self))))
+	  (when (stringp (sk-shed self)) (setf (sk-shed self) (pathname (sk-shed self))))
 	  (setf (ast self) nil)
 	  self)
 	;; invalid ast, signal error
@@ -264,6 +266,7 @@ via the special form stored in RECIPE."))
 (defmethod sk-install-user-config ((self sk-project) (cfg sk-user-config))
   (with-slots (vc shed stash license author) (debug! cfg) ;; log-level, custom, fmt
     (when vc (setf (sk-vc self) vc))
+    (when shed (setf (sk-stash self) stash))
     (when shed (setf (sk-shed self) shed))
     (when license (setf (sk-license self) license))
     (when author (setf (sk-author self) author))))

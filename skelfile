@@ -59,7 +59,7 @@
  (:lisp-system "skel/examples"
 	       :depends-on ("skel")
 	       :components ((:file "examples"))))
-:snippets nil
-:stash nil
-:shed nil
+:stash "~/stash"
+:shed "~/shed"
 :abbrevs nil
+:snippets ((autogen #$sbcl --eval '(asdf:make :skel/cli)'$#))
