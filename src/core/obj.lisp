@@ -92,7 +92,7 @@ via the special form stored in RECIPE."))
 
 (defmethod sk-write ((self sk-rule) stream)
   (with-slots (target source recipe) self
-    (sk-write-string target)
+    (write-string target) ;; target isn't typep SK-OBJECT
     (sk-write-string source)
     (sk-write-string recipe)))
 
